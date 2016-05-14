@@ -1,6 +1,3 @@
-# TODO
-#  * add support for repetitions
-#  * pause between bench executions and repetitions
 ---
 - hosts: all
   tasks:
@@ -11,11 +8,8 @@
 
   - name: ensure that every item in benchmarks dict has all expected variables
     assert:
-      that:
-      - 'item.id is defined'
-      - 'item.image_name is defined'
-      - 'item.image_args is defined'
-      - 'item.docker_flags is defined'
+      that: 'item.id is defined and item.image_name is defined and 
+             item.image_args is defined and item.docker_flags is defined'
     with_items: '{{ benchmarks }}'
 
   - name: pull images
@@ -45,8 +39,8 @@
       results: '{{ results |
           combine(
             { item.0.id:
-              { "machines":
-                { "name": item.1, "results": hostvars[item.1]["all_results"][item.0.id] }}},
+              { "results":
+                { item.1: hostvars[item.1]["all_results"][item.0.id] }}},
             recursive=True)  }}'
     with_nested:
     - '{{ benchmarks }}'
