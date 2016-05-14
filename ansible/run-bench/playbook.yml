@@ -1,0 +1,59 @@
+# TODO
+#  * add support for repetitions
+#  * pause between bench executions and repetitions
+---
+- hosts: all
+  tasks:
+  - name: ensure benchmarks dict exists
+    assert:
+      that:
+      - 'benchmarks is defined'
+
+  - name: ensure that every item in benchmarks dict has all expected variables
+    assert:
+      that:
+      - 'item.id is defined'
+      - 'item.image_name is defined'
+      - 'item.image_args is defined'
+      - 'item.docker_flags is defined'
+    with_items: '{{ benchmarks }}'
+
+  - name: pull images
+    shell: docker pull {{ item.image_name }}
+    with_items: '{{ benchmarks }}'
+
+  - name: run benchmarks
+    include: bench.yml bench={{item}}
+    with_items: '{{ benchmarks }}'
+
+  - name: define results variable
+    local_action:
+      module: set_fact
+      results: {}
+    run_once: true
+
+  - name: add benchmark metadata
+    local_action:
+      module: set_fact
+      results: '{{ results | combine({ item.id: {"meta":item} }, recursive=True) }}'
+    with_items: '{{ benchmarks }}'
+    run_once: true
+
+  - name: populate results variable
+    local_action:
+      module: set_fact
+      results: '{{ results |
+          combine(
+            { item.0.id:
+              { "machines":
+                { "name": item.1, "results": hostvars[item.1]["all_results"][item.0.id] }}},
+            recursive=True)  }}'
+    with_nested:
+    - '{{ benchmarks }}'
+    - '{{ groups.all }}'
+    when: 'item.1 != "localhost"'
+    run_once: true
+
+  - name: store results
+    local_action: copy content={{ results }} dest=./results.json
+    run_once: true

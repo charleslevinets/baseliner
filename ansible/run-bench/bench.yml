@@ -1,0 +1,29 @@
+---
+- name: check that bench and rep variables are defined
+  assert:
+    that:
+    - bench is defined
+
+# TODO
+#  * add pre and post commands, e.g.
+#     - name: run pre
+#       shell: '{{ item }}'
+#       with_items: '{{ bench.pre_commands }}'
+
+- name: create global result variable
+  set_fact:
+    all_results: {}
+  when: all_results is not defined
+
+# we need a list since we support multiple executions of the same bench
+- name: create result for this benchmark
+  set_fact:
+    bench_result: []
+
+- name: run bench
+  shell: docker run {{ bench.docker_flags }} {{ bench.image_name }} {{ bench.image_args }}
+  register: docker_output
+
+- name: add results to global variable
+  set_fact:
+    all_results: '{{ all_results | combine({bench.id:(docker_output.stdout | from_json)}) }}'
