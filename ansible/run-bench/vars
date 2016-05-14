@@ -1,0 +1,11 @@
+---
+benchmarks:
+- id: dummy_1
+  docker_flags: '--rm'
+  image_name: ivotron/dummybench
+  image_args: ' '
+- id: dummy_2
+  docker_flags: '--rm'
+  image_name: ivotron/dummybench
+  image_args: ' '
+
