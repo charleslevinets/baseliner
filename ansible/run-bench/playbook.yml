@@ -5,6 +5,7 @@
     assert:
       that:
       - 'benchmarks is defined'
+      - 'docker_flags_global is defined'
 
   - name: ensure that every item in benchmarks dict has all expected variables
     assert:
@@ -16,8 +17,13 @@
     shell: docker pull {{ item.image_name }}
     with_items: '{{ benchmarks }}'
 
+  - name: reset results variable that gets populated in bench.yml
+    set_fact:
+      all_results: []
+    when: all_results is not defined
+
   - name: run benchmarks
-    include: bench.yml bench={{item}}
+    include: bench.yml bench={{item}} docker_flags_all={{ docker_flags_global }}
     with_items: '{{ benchmarks }}'
 
   - name: define results variable
@@ -26,26 +32,15 @@
       results: {}
     run_once: true
 
-  - name: add benchmark metadata
-    local_action:
-      module: set_fact
-      results: '{{ results | combine({ item.id: {"meta":item} }, recursive=True) }}'
-    with_items: '{{ benchmarks }}'
-    run_once: true
-
   - name: populate results variable
     local_action:
       module: set_fact
       results: '{{ results |
-          combine(
-            { item.0.id:
-              { "results":
-                { item.1: hostvars[item.1]["all_results"][item.0.id] }}},
-            recursive=True)  }}'
-    with_nested:
-    - '{{ benchmarks }}'
-    - '{{ groups.all }}'
-    when: 'item.1 != "localhost"'
+        combine(
+          { item: hostvars[item]["all_results"] },
+          recursive=True)  }}'
+    with_items: '{{ groups.all }}'
+    when: 'item != "localhost"'
     run_once: true
 
   - name: store results

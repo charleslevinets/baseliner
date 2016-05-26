@@ -1,11 +1,12 @@
 ---
+docker_flags_global: '--rm'
 benchmarks:
 - id: dummy_1
-  docker_flags: '--rm'
+  docker_flags: ''
   image_name: ivotron/dummybench
-  image_args: ' '
+  image_args: ''
 - id: dummy_2
-  docker_flags: '--rm'
+  docker_flags: ''
   image_name: ivotron/dummybench
-  image_args: ' '
+  image_args: ''
 

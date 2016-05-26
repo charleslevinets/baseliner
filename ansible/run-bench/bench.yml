@@ -1,18 +1,25 @@
 ---
 - name: check that bench and rep variables are defined
   assert:
-    that:
-    - bench is defined
-
-- name: create global result variable
-  set_fact:
-    all_results: {}
-  when: all_results is not defined
+    that: 'bench is defined and all_results is defined'
 
 - name: run bench
-  shell: docker run {{ bench.docker_flags }} {{ bench.image_name }} {{ bench.image_args }}
+  shell: >
+    docker run {{ docker_flags_all }} \
+               {{ bench.docker_flags }} \
+               {{ bench.image_name }} \
+               {{ bench.image_args }}
   register: docker_output
 
 - name: add results to global variable
   set_fact:
-    all_results: '{{ all_results | combine({bench.id:(docker_output.stdout | from_json)}) }}'
+    all_results: '{{
+      all_results |
+        union(
+          [{ "id": bench.id,
+            "docker_flags": docker_flags_all bench.docker_flags,
+            "image_name": bench.image_name,
+            "image_args": bench.image_args,
+            "tests": (docker_output.stdout | from_json) }],
+        )
+    }}'
