@@ -1,5 +1,8 @@
 ---
 docker_flags_global: '--rm'
+docker_flags_machine:
+  nibbler.soe.ucsc.edu: '-ti'
+  dwill.soe.ucsc.edu: '-ti'
 benchmarks:
 - id: dummy_1
   docker_flags: ''
@@ -9,4 +12,3 @@ benchmarks:
   docker_flags: ''
   image_name: ivotron/dummybench
   image_args: ''
-

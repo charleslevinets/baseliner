@@ -1,11 +1,14 @@
 ---
 - name: check that bench and rep variables are defined
   assert:
-    that: 'bench is defined and all_results is defined'
+    that: 'bench is defined and
+           all_results is defined and
+           docker_flags_machine[ansible_hostname] is defined'
 
 - name: run bench
   shell: >
     docker run {{ docker_flags_all }} \
+               {{ docker_flags_machine[ansible_hostname] }} \
                {{ bench.docker_flags }} \
                {{ bench.image_name }} \
                {{ bench.image_args }}
