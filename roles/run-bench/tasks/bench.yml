@@ -1,5 +1,5 @@
 ---
-- name: check that bench and rep variables are defined
+- name: check that required variables are defined
   assert:
     that: 'bench is defined and
            all_results is defined and
@@ -19,10 +19,14 @@
     all_results: '{{
       all_results |
         union(
-          [{ "id": bench.id,
-            "docker_flags": docker_flags_all bench.docker_flags,
+          [{
+            "id": bench.id,
+            "docker_flags": (docker_flags_all + " " +
+                             docker_flags_machine[ansible_hostname] + " " +
+                             bench.docker_flags),
             "image_name": bench.image_name,
             "image_args": bench.image_args,
-            "tests": (docker_output.stdout | from_json) }],
+            "tests": (docker_output.stdout | from_json)
+          }]
         )
     }}'
