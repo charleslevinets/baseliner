@@ -20,7 +20,7 @@
     all_results: []
 
 - name: run benchmarks
-  include: bench.yml bench={{item}} docker_flags_all={{ docker_flags_global }}
+  include: bench.yml benchmark={{item}} docker_flags_all={{ docker_flags_global }}
   with_items: '{{ benchmarks }}'
 
 - name: define results variable
