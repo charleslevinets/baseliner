@@ -11,7 +11,7 @@
 
 - name: set iterations variable if not given
   set_fact:
-    iterations: [1]
+    iterations: 1
   when: iterations is not defined
 
 - name: run bench
@@ -22,7 +22,7 @@
                {{ bench.image_name }} \
                {{ bench.image_args }}
   register: docker_output
-  with_items: '{{ iterations }}'
+  with_sequence: count='{{ iterations }}'
 
 - name: initialize bench output variable
   set_fact:
@@ -44,7 +44,7 @@
                            bench.docker_flags),
           "image_name": bench.image_name,
           "image_args": bench.image_args,
-          "iterations": (iterations | length),
+          "iterations": iterations,
           "tests": all_iterations
         }]
       )
