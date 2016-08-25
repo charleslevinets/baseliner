@@ -9,11 +9,6 @@
            all_results is defined and
            docker_flags_machine[ansible_hostname] is defined'
 
-- name: set iterations variable if not given
-  set_fact:
-    iterations: 1
-  when: iterations is not defined
-
 - name: run bench
   shell: >
     docker run {{ docker_flags_all }} \

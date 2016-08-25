@@ -1,4 +1,5 @@
 ---
+iterations: 1
 docker_flags_global: '--rm'
 docker_flags_machine:
   nibbler.soe.ucsc.edu: '-ti'
