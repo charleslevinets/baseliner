@@ -1,5 +1,4 @@
 ---
 - hosts: all
-  tasks:
-  - name: run benchmarks
-    include: run-bench.yml
+  roles:
+  - run-bench

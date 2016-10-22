@@ -3,27 +3,18 @@
   assert:
     that:
     - 'benchmarks is defined'
-    - 'docker_flags_global is defined'
-
-- name: ensure that every item in benchmarks dict has all expected variables
-  assert:
-    that: 'item.id is defined and item.image_name is defined and 
-           item.image_args is defined and item.docker_flags is defined'
-  with_items: '{{ benchmarks }}'
-
-- name: pull images
-  shell: docker pull {{ item.image_name }}
-  with_items: '{{ benchmarks }}'
 
 - name: reset results variable that gets populated in bench.yml
   set_fact:
     all_results: []
 
 - name: run benchmarks
-  include: bench.yml benchmark={{item}} docker_flags_all={{ docker_flags_global }}
+  include: run-bench.yml benchmark={{item}}
   with_items: '{{ benchmarks }}'
+  loop_control:
+    loop_var: bench
 
-- name: define results variable
+- name: initialize results variable
   local_action:
     module: set_fact
     results: {}

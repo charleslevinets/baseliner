@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "" > ansible.log
-ansible-playbook -e @vars playbook.yml
+ansible-playbook -e @vars.yml playbook.yml

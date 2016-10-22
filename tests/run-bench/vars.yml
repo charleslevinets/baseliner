@@ -1,0 +1,19 @@
+---
+benchmarks:
+- name: lulesh
+  put:
+  - src: ./mpihosts
+    dest: /tmp/mpihosts
+  repetitions: 3
+  image: ivotron/lulesh
+  volumes:
+  - /tmp/mpihosts:/mpihosts
+  env:
+    SSHD_PORT: 2222
+    MPIRUN_FLAGS: '-np 8 --hostfile mpihosts'
+    WAIT_SECS: 1
+  env_host:
+    dwill:
+      RANK0: 1
+  args: '-i 1 -s 1 -p'
+  network_mode: host
