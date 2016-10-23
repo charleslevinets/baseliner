@@ -3,7 +3,7 @@
   assert:
     that: 'bench is defined and all_results is defined'
 
-- name: pull container
+- name: pull image
   command: 'docker pull {{ bench.image }}'
 
 # upload files
@@ -17,7 +17,7 @@
   set_fact:
     docker_flags: '--name={{ bench.name }}'
 
-# remove
+# remove if container exists or is running
 - name: stop container
   command: 'docker stop {{ bench.name }}'
   ignore_errors: true
@@ -33,21 +33,13 @@
   when: 'bench.env is defined'
 
 # host-specific environment
-- name: initialize env_host
-  set_fact:
-    env_host: {}
-
 - name: check if there is a host-specific environment
   set_fact:
-    env_host: '{{ bench.env_host[ansible_hostname] }}'
+    docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
   when:
   - 'bench.env_host is defined'
   - 'ansible_hostname in bench.env_host'
-
-- name: add host-specific environment to docker_flags
-  set_fact:
-    docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
-  with_dict: '{{ env_host }}'
+  with_dict: '{{ bench.env_host[ansible_hostname] | default({}) }}'
 
 # network_mode
 - name: add network mode to docker_flags
@@ -55,16 +47,22 @@
     docker_flags: '{{ docker_flags }} --net={{ bench.network_mode }}'
   when: 'bench.network_mode is defined'
 
+# ports
+- name: add ports to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} -p {{ item }}'
+  with_items: '{{ bench.ports | default([]) }}'
+
 # volumes
 - name: add volumes args
   set_fact:
     docker_flags: '{{ docker_flags }} -v {{ item }}'
-  with_items: '{{ bench.volumes }}'
+  with_items: '{{ bench.volumes | default([]) }}'
 
 # container arguments
 - name: set args value
   set_fact:
-    container_args: '{{ ( bench.args | default("") }}'
+    container_args: '{{ bench.args | default("") }}'
 
 # run
 - name: initialize bench output variable
