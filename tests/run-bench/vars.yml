@@ -1,19 +1,20 @@
 ---
 benchmarks:
-- name: lulesh
+- name: mpi_helloworld
   put:
   - src: ./mpihosts
     dest: /tmp/mpihosts
-  repetitions: 3
-  image: ivotron/lulesh
+  repetitions: 2
+  image: ivotron/openmpi
   volumes:
-  - /tmp/mpihosts:/mpihosts
+  - /tmp/mpihosts:/tmp/mpihosts
   env:
     SSHD_PORT: 2222
-    MPIRUN_FLAGS: '-np 8 --hostfile mpihosts'
-    WAIT_SECS: 1
+    ADD_INSECURE_KEY: true
+    WAIT_SECS: 20
+    MPIRUN_FLAGS: '--mca btl self,sm,tcp'
   env_host:
-    dwill:
+    issdm-6:
       RANK0: 1
-  args: '-i 1 -s 1 -p'
   network_mode: host
+  args: /root/example/mpi_helloworld
