@@ -65,10 +65,6 @@
     container_args: '{{ bench.args | default("") }}'
 
 # run
-- name: initialize bench output variable
-  set_fact:
-    all_repetitions: []
-
 - name: run container
   shell: docker run --rm {{ docker_flags }} {{ bench.image }} {{ container_args }}
   register: docker_output
@@ -77,17 +73,33 @@
 # process results
 - name: add result to all repetitions variable
   set_fact:
-    all_repetitions: '{{ (all_repetitions + (item.stdout | from_json)) }}'
+    all_repetitions: '{{ (all_repetitions | default([])) + (item.stdout | from_json)) }}'
   with_items: '{{ docker_output.results }}'
+  when: 'bench.measure_runtime == false | default(false)'
+
+- name: measure runtime if requested
+  set_fact:
+    all_repetitions: '{{ (all_repetitions | default([])) + [{
+                           "name": bench.args,
+                           "result": item.delta,
+                           "lower_is_better": true,
+                           "units": "timestamp"
+                         }]
+                      }}'
+  with_items: '{{ docker_output.results }}'
+  when:
+  - 'item.stdout != ""'
+  - 'bench.measure_runtime == true | default(false)'
 
 - name: add results to global variable
   set_fact:
     all_results: '{{
       all_results | union(
         [{
-          "id": bench.id,
-          "repetitions": repetitions,
+          "id": bench.name,
+          "repetitions": bench.repetitions,
           "tests": all_repetitions
         }]
       )
     }}'
+  when: 'all_repetitions is defined'
