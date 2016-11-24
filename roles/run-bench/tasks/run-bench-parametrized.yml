@@ -1,0 +1,12 @@
+- name: create parameter dictionary
+  set_fact:
+    params: '{{ params | default({}) | combine({item.0: item.1})}}'
+  with_together:
+  - '{{ parameter_names }}'
+  - '{{ parameter_values }}'
+
+- name: run benchmarks
+  include: run-bench.yml
+  with_items: '{{ benchmarks }}'
+  loop_control:
+    loop_var: bench

@@ -3,9 +3,6 @@
   assert:
     that: 'bench is defined'
 
-- name: pull image
-  command: 'docker pull {{ bench.image }}'
-
 # upload files
 - name: upload files
   copy:
@@ -13,67 +10,6 @@
     dest: '{{ item.dest }}'
   with_items: '{{ bench.put }}'
 
-- name: initialize docker_flags variable
-  set_fact:
-    docker_flags: ''
-
-# remove container
-- name: stop container
-  shell: 'docker stop $(docker ps -aq --filter ancestor={{ bench.image }})'
-  ignore_errors: true
-- name: remove container
-  shell: 'docker rm $(docker ps -aq --filter ancestor={{ bench.image }})'
-  ignore_errors: true
-
-# environment
-- name: add environment to docker_flags
-  set_fact:
-    docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
-  with_dict: '{{ bench.env }}'
-  when: 'bench.env is defined'
-
-# host-specific environment
-- name: check if there is a host-specific environment
-  set_fact:
-    docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
-  when:
-  - 'bench.env_host is defined'
-  - 'ansible_hostname in bench.env_host'
-  with_dict: '{{ bench.env_host[ansible_hostname] | default({}) }}'
-
-# devices
-- name: add devices to docker_flags
-  set_fact:
-    docker_flags: '{{ docker_flags }} --device {{ item }}'
-  with_items: '{{ bench.devices | default([]) }}'
-
-# network_mode
-- name: add network mode to docker_flags
-  set_fact:
-    docker_flags: '{{ docker_flags }} --net={{ bench.network_mode }}'
-  when: 'bench.network_mode is defined'
-
-# ports
-- name: add ports to docker_flags
-  set_fact:
-    docker_flags: '{{ docker_flags }} -p {{ item }}'
-  with_items: '{{ bench.ports | default([]) }}'
-
-# volumes
-- name: add volumes args
-  set_fact:
-    docker_flags: '{{ docker_flags }} -v {{ item }}'
-  with_items: '{{ bench.volumes | default([]) }}'
-
-# container arguments
-- name: set args value
-  set_fact:
-    container_args: '{{ bench.args | default("") }}'
-
-# run
-- name: run container
-  shell: >
-    docker run --rm --name={{ bench.name }}-{{ ansible_hostname }}-{{ item }} \
-      {{ docker_flags }} \
-      {{ bench.image }} \
-      {{ container_args }}
+- name: run containerized benchmark
+  include: run-container.yml
+  when: 'bench.image is defined'
