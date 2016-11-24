@@ -1,5 +1,5 @@
 ---
-- name: check that required variables are defined
+- name: check that bench variable is defined
   assert:
     that: 'bench is defined'
 
@@ -8,22 +8,26 @@
   copy:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
-  with_items: '{{ bench.put }}'
+  with_items: '{{ bench.put | default([]) }}'
 
 # run benchmark
 - name: run containerized benchmark
   include: run-container.yml
   when: 'bench.image is defined'
 
+- name: run script benchmark
+  script: '{{ bench.script }}' '{{ bench.args}}'
+  when: 'bench.script is defined'
+
 # download results
 - name: initialize string for path
   set_fact:
-    output_folder: '{{results_path | default("./results/")}}'
+    output_folder: '{{ results_path | default("./results/") }}'
 
 - name: add key/value pairs for each parameter (if any)
   set_fact:
     output_folder: '{{ output_folder + "/" + item.key + "/" + item.value }}'
-  with_dict: '{{params}}'
+  with_dict: '{{ params | default({}) }}'
 
 - name: get any bench-specific files
   synchronize:
