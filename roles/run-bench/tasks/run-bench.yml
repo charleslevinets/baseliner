@@ -10,6 +10,23 @@
     dest: '{{ item.dest }}'
   with_items: '{{ bench.put }}'
 
+# run benchmark
 - name: run containerized benchmark
   include: run-container.yml
   when: 'bench.image is defined'
+
+# download results
+- name: initialize string for path
+  set_fact:
+    output_folder: '{{results_path | default("./results/")}}'
+
+- name: add key/value pairs for each parameter (if any)
+  set_fact:
+    output_folder: '{{ output_folder + "/" + item.key + "/" + item.value }}'
+  with_dict: '{{params}}'
+
+- name: get any bench-specific files
+  synchronize:
+    src: '{{ item }}'
+    dest: '{{output_folder}}/'
+  with_items: '{{bench.get | default([])}}'
