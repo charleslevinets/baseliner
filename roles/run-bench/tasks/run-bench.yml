@@ -41,6 +41,12 @@
   - 'ansible_hostname in bench.env_host'
   with_dict: '{{ bench.env_host[ansible_hostname] | default({}) }}'
 
+# devices
+- name: add devices to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} --device {{ item }}'
+  with_items: '{{ bench.devices | default([]) }}'
+
 # network_mode
 - name: add network mode to docker_flags
   set_fact:
