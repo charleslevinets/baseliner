@@ -1,3 +1,4 @@
+---
 - name: create parameter dictionary
   set_fact:
     params: '{{ params | default({}) | combine({item.0: item.1})}}'
@@ -5,8 +6,37 @@
   - '{{ parameter_names }}'
   - '{{ parameter_values }}'
 
-- name: run benchmarks
-  include: run-bench.yml
-  with_items: '{{ benchmarks }}'
-  loop_control:
-    loop_var: bench
+- name: run containerized benchmark
+  include: run-container.yml
+  when: 'bench.image is defined'
+
+- name: run script benchmark
+  script: '{{ bench.script }} {{ bench.args }}'
+  when: 'bench.script is defined'
+
+# download results
+# {
+- name: initialize string for path
+  set_fact:
+    output_folder: '{{ results_path | default("./results/") }}'
+
+- name: add key/value pairs for each parameter (if any)
+  set_fact:
+    output_folder: '{{ output_folder + "/" + item.key + "/" + item.value }}'
+  with_dict: '{{ params | default({}) }}'
+  when: '"singletonparamveryunlikelytobegivenbyuser" not in parameter_names'
+
+- name: ensure output folder exists
+  local_action:
+    module: file
+    path: '{{ output_folder }}'
+    state: directory
+  run_once: true
+
+- name: get any bench-specific files
+  synchronize:
+    src: '{{ item }}/'
+    dest: '{{ output_folder }}/'
+    mode: pull
+  with_items: '{{ bench.fetch | default([])}}'
+# }

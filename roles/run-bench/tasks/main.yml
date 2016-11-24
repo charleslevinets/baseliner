@@ -4,25 +4,11 @@
     that:
     - 'benchmarks is defined'
 
-- name: unnest parameters
-  set_fact:
-    parameter_names: '{{ (parameter_names | default([])) + [item.key] }}'
-    parameter_list: '{{ (parameter_list | default([])) +  [item.value] }}'
-  with_dict: '{{ parameters | default({}) }}'
-
-- name: parametrized execution
-  include: run-bench-parametrized.yml
-  with_cartesian: '{{ parameter_list }}'
-  loop_control:
-    loop_var: parameter_values
-  when: 'parameters is defined'
-
-- name: non-parametrized execution
+- name: execute each benchmark
   include: run-bench.yml
   with_items: '{{ benchmarks }}'
   loop_control:
     loop_var: bench
-  when: 'parameters is not defined'
 
 - name: store facts
   include: store-facts.yml

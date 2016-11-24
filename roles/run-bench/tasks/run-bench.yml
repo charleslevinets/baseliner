@@ -1,36 +1,23 @@
 ---
-- name: check that bench variable is defined
-  assert:
-    that: 'bench is defined'
-
-# upload files
 - name: upload files
   copy:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
   with_items: '{{ bench.put | default([]) }}'
 
-# run benchmark
-- name: run containerized benchmark
-  include: run-container.yml
-  when: 'bench.image is defined'
-
-- name: run script benchmark
-  script: '{{ bench.script }}' '{{ bench.args}}'
-  when: 'bench.script is defined'
-
-# download results
-- name: initialize string for path
+- name: unnest parameters
   set_fact:
-    output_folder: '{{ results_path | default("./results/") }}'
-
-- name: add key/value pairs for each parameter (if any)
+    parameter_names: '{{ (parameter_names | default([])) + [item.key] }}'
+    parameter_list: '{{ (parameter_list | default([])) +  [item.value] }}'
+  with_dict: '{{ bench.parameters | default({}) }}'
+- name: add one item to parameters if no parameters were given
   set_fact:
-    output_folder: '{{ output_folder + "/" + item.key + "/" + item.value }}'
-  with_dict: '{{ params | default({}) }}'
+    parameter_names: ['singletonparamveryunlikelytobegivenbyuser']
+    parameter_list: [1]
+  when: 'bench.parameters is not defined'
 
-- name: get any bench-specific files
-  synchronize:
-    src: '{{ item }}'
-    dest: '{{output_folder}}/'
-  with_items: '{{bench.get | default([])}}'
+- name: parametrized execution
+  include: run-bench-parametrized.yml
+  with_cartesian: '{{ parameter_list }}'
+  loop_control:
+    loop_var: parameter_values
