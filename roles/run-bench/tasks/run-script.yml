@@ -1,0 +1,14 @@
+---
+- name: push script
+  copy:
+    src: '{{ bench.script }}'
+    dest: '/tmp/{{ bench.script }}'
+    mode: 0755
+- shell: 'echo executing {{ bench.script }} {{ bench.args }}'
+  environment: '{{ params }}'
+  register: echo_msg
+- debug: msg="executing {{ echo_msg.stdout }}"
+- name: run script benchmark
+  shell: '/tmp/{{ bench.script }} {{ bench.args }}'
+  environment: '{{ params }}'
+  when: 'bench.script is defined'
