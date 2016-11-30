@@ -4,11 +4,25 @@
     src: '{{ bench.script }}'
     dest: '/tmp/{{ bench.script }}'
     mode: 0755
-- shell: 'echo executing {{ bench.script }} {{ bench.args }}'
-  environment: '{{ params }}'
-  register: echo_msg
-- debug: msg="executing {{ echo_msg.stdout }}"
-- name: run script benchmark
-  shell: '/tmp/{{ bench.script }} {{ bench.args }}'
-  environment: '{{ params }}'
-  when: 'bench.script is defined'
+
+- name: record time before execution
+  local_action: command date +%s
+  register: time_before
+  run_once: true
+  when: 'bench.measure_runtime | default(false)'
+
+- name: time task
+  local_action: command date +%s
+  register: time_before
+  run_once: true
+  when: 'bench.measure_runtime | default(false)'
+
+- name: record time after execution
+  local_action: command date +%s
+  register: time_after
+  run_once: true
+  when: 'bench.measure_runtime | default(false)'
+
+- name: record elapsed time in output folder
+  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}})) >> {{results_folder}}/runtime
+  when: 'bench.measure_runtime | default(false)'

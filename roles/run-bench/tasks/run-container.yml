@@ -56,9 +56,25 @@
     container_args: " -c '{{ bench.args }}'"
   when: 'bench.args is defined'
 
+- name: record time before execution
+  local_action: command date +%s
+  register: time_before
+  run_once: true
+  when: 'bench.measure_runtime | default(false)'
+
 - name: run container
   shell: >
     docker run --rm --name={{ bench.name }}-{{ ansible_hostname }} \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ container_args | default("") }}
+
+- name: record time after execution
+  local_action: command date +%s
+  register: time_after
+  run_once: true
+  when: 'bench.measure_runtime | default(false)'
+
+- name: record elapsed time in output folder
+  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}})) >> {{results_folder}}/runtime
+  when: 'bench.measure_runtime | default(false)'
