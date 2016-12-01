@@ -3,18 +3,18 @@
   copy:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
-  with_items: '{{ bench.put | default([]) }}'
+  with_items: '{{ benchmark.put | default([]) }}'
 
 - name: unnest parameters
   set_fact:
     parameter_names: '{{ (parameter_names | default([])) + [item.key] }}'
     parameter_list: '{{ (parameter_list | default([])) +  [item.value] }}'
-  with_dict: '{{ bench.parameters | default({}) }}'
+  with_dict: '{{ benchmark.parameters | default({}) }}'
 - name: add one item to parameters if no parameters were given
   set_fact:
     parameter_names: ['singletonparamveryunlikelytobegivenbyuser']
     parameter_list: [1]
-  when: 'bench.parameters is not defined'
+  when: 'benchmark.parameters is not defined'
 
 - name: parametrized execution
   include: run-bench-parametrized.yml
