@@ -12,13 +12,12 @@
 - name: ensure output folder exists
   local_action:
     module: file
-    path: '{{ output_folder }}'
+    path: '{{ output_folder }}/machine/{{ ansible_hostname }}'
     state: directory
-  run_once: true
 
 - name: get any bench-specific files
   synchronize:
     src: '{{ item }}/'
-    dest: '{{ output_folder }}/'
+    dest: '{{ output_folder }}/machine/{{ ansible_hostname }}/'
     mode: pull
   with_items: '{{ bench.fetch | default([])}}'

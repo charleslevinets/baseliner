@@ -21,4 +21,3 @@
   run_once: true
   with_items: '{{ groups.all }}'
   when: 'item != "localhost"'
-
