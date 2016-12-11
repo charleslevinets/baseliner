@@ -40,6 +40,11 @@
     docker_flags: '{{ docker_flags }} --net={{ bench.network_mode }}'
   when: 'bench.network_mode is defined'
 
+- name: add ipc mode to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} --ipc={{ bench.ipc }}'
+  when: 'bench.ipc is defined'
+
 - name: add ports to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} -p {{ item }}'
