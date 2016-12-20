@@ -18,6 +18,6 @@
 - name: get any bench-specific files
   synchronize:
     src: '{{ item }}/'
-    dest: '{{ output_folder }}/machine/{{ ansible_hostname }}/benchmark/{{ bench.id }}/'
+    dest: '{{ output_folder }}/machine/{{ ansible_hostname }}/benchmark/{{ bench.name }}/'
     mode: pull
   with_items: '{{ bench.fetch | default([])}}'
