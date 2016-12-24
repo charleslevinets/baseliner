@@ -1,23 +1,31 @@
 ---
 - name: initialize string for path
   set_fact:
-    output_folder: '{{ results_path | default("./results/") }}'
+    output_folder: '{{ results_path | default("./results/") }}/machine/{{ ansible_hostname }}/benchmark/{{ bench.name }}'
 
 - name: add key/value pairs for each parameter (if any)
   set_fact:
     output_folder: '{{ output_folder }}/{{ item.key }}/{{ item.value }}'
   with_dict: '{{ params | default({}) }}'
-  when: '"singletonparamveryunlikelytobegivenbyuser" not in parameter_names'
+  when: '"hey_ho_lets_go" not in parameter_names'
 
 - name: ensure output folder exists
   local_action:
     module: file
-    path: '{{ output_folder }}/machine/{{ ansible_hostname }}'
+    path: '{{ output_folder }}'
     state: directory
 
 - name: get any bench-specific files
   synchronize:
     src: '{{ item }}/'
-    dest: '{{ output_folder }}/machine/{{ ansible_hostname }}/benchmark/{{ bench.name }}/'
+    dest: '{{ output_folder }}/'
     mode: pull
   with_items: '{{ bench.fetch | default([])}}'
+
+- name: delete remote folder after transfer
+  file:
+    path: '{{ item }}/'
+    state: absent
+  with_items: '{{ bench.fetch | default([])}}'
+  when: '{{ remove_benchmark_output | default(true) }}'
+  become: true

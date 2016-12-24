@@ -5,16 +5,16 @@
     dest: '{{ item.dest }}'
   with_items: '{{ benchmark.put | default([]) }}'
 
-- name: unnest parameters
+- name: initialize parameter lists
   set_fact:
-    parameter_names: '{{ (parameter_names | default([])) + [item.key] }}'
-    parameter_list: '{{ (parameter_list | default([])) +  [item.value] }}'
-  with_dict: '{{ benchmark.parameters | default({}) }}'
-- name: add one item to parameters if no parameters were given
+    parameter_names: []
+    parameter_list: []
+
+- name: unnest parameters when parameters for benchmark were passed
   set_fact:
-    parameter_names: ['singletonparamveryunlikelytobegivenbyuser']
-    parameter_list: [1]
-  when: 'benchmark.parameters is not defined'
+    parameter_names: '{{ parameter_names + [item.key] }}'
+    parameter_list: '{{ parameter_list + [item.value] }}'
+  with_dict: '{{ benchmark.parameters | default({"hey_ho_lets_go": 1}) }}'
 
 - name: parametrized execution
   include: run-bench-parametrized.yml
