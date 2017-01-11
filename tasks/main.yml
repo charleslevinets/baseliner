@@ -4,6 +4,12 @@
     that:
     - 'benchmarks is defined'
 
+- name: ensure benchmark output folder exists
+  local_action:
+    module: file
+    path: '{{ results_path | default("./results/") }}'
+    state: directory
+
 - name: execute each benchmark
   include: run-bench.yml
   with_items: '{{ benchmarks }}'
