@@ -85,6 +85,6 @@
   when: 'bench.measure_runtime | default(true)'
 
 - name: record elapsed time in output folder
-  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" >> {{results_path | default("./results/")}}/runtime_{{bench.name}}_{{ansible_hostname}}
+  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" > {{results_path | default("./results/")}}/runtime_{{bench.name}}_{{ansible_hostname}}
   when: 'bench.measure_runtime | default(true)'
   run_once: true

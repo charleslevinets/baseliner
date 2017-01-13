@@ -44,6 +44,7 @@
       --volume=/tmp/prometheus.yml:/tmp/prometheus.yml \
       prom/prometheus \
         -storage.local.path=/prometheus \
+        -storage.local.checkpoint-interval=2m0s \
         -config.file=/tmp/prometheus.yml
   run_once: true
 
