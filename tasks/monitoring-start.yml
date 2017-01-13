@@ -1,0 +1,69 @@
+---
+- name: stop monitoring
+  include: monitoring-stop.yml
+
+- name: output folder for metrics
+  local_action:
+    module: set_fact
+    metrics_folder: '{{ results_path | default("./results/") }}/metrics'
+  run_once: true
+  with_items: '{{ groups.all }}'
+  when: 'item != "localhost"'
+
+- name: ensure output folder exists
+  local_action:
+    module: file
+    path: '{{ metrics_folder }}'
+    state: directory
+  run_once: true
+
+- name: remove existing cmetrics
+  local_action: command rm -fr {{ metrics_folder }}/cmetrics/
+  run_once: true
+
+- name: create target list for prometheus
+  local_action:
+    module: set_fact
+    prometheus_targets: "{{ ( prometheus_targets | default([]) ) + [item+':9100', item+':8080'] }}"
+  run_once: true
+  with_items: '{{ groups.all }}'
+  when: 'item != "localhost"'
+
+- name: create prometheus config file
+  local_action:
+    module: template
+    src: prometheus.yml.j2
+    dest: /tmp/prometheus.yml
+  run_once: true
+
+- name: start prometheusdb in localhost
+  local_action: shell
+    docker run -d --net=host \
+      --name=prometheus \
+      --volume={{ metrics_folder }}/cmetrics:/prometheus \
+      --volume=/tmp/prometheus.yml:/tmp/prometheus.yml \
+      prom/prometheus \
+        -storage.local.path=/prometheus \
+        -config.file=/tmp/prometheus.yml
+  run_once: true
+
+- name: wait for timeseries db to start
+  pause: seconds=10
+
+- name: start cadvisor on each node
+  shell: >
+    docker run -d -p 8080:8080 \
+      --name=cadvisor \
+      --volume=/:/rootfs:ro \
+      --volume=/var/run:/var/run:rw \
+      --volume=/sys:/sys:ro \
+      --volume=/var/lib/docker/:/var/lib/docker:ro \
+      --label org.label-schema.group=monitoring \
+      google/cadvisor
+
+- name: start node-exporter
+  shell: >
+    docker run -d -p 9100:9100 \
+      --name=node-exporter \
+      --label org.label-schema.group=monitoring \
+      prom/node-exporter

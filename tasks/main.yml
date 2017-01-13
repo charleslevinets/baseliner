@@ -10,6 +10,10 @@
     path: '{{ results_path | default("./results/") }}'
     state: directory
 
+- name: start monitoring
+  include: monitoring-start.yml
+  when: '(enable_monitoring | default(false)) == true'
+
 - name: execute each benchmark
   include: run-bench.yml
   with_items: '{{ benchmarks }}'
@@ -19,3 +23,7 @@
 - name: store facts
   include: store-facts.yml
   when: '{{ store_facts | default(true) }}'
+
+- name: stop monitoring
+  include: monitoring-stop.yml
+  when: '(enable_monitoring | default(false)) == true'

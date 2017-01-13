@@ -1,0 +1,21 @@
+---
+- name: stop prometheusdb
+  local_action: command docker stop prometheus
+  run_once: true
+  ignore_errors: true
+- name: remove prometheus
+  local_action: command docker rm prometheus
+  run_once: true
+  ignore_errors: true
+- name: stop node-exporter
+  command: docker stop node-exporter
+  ignore_errors: true
+- name: rm node-exporter
+  command: docker rm node-exporter
+  ignore_errors: true
+- name: stop cadvisor
+  command: docker stop cadvisor
+  ignore_errors: true
+- name: rm cadvisor
+  command: docker rm cadvisor
+  ignore_errors: true
