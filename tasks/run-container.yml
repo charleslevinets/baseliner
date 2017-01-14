@@ -28,7 +28,7 @@
 - name: add host-specific environment to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
-  with_dict: '{{ env_host_map[ansible_hostname] | default({}) }}'
+  with_dict: '{{ env_host_map[inventory_hostname] | default({}) }}'
 
 - name: add devices to docker_flags
   set_fact:
@@ -73,7 +73,7 @@
 
 - name: run container
   shell: >
-    docker run --rm --name={{ bench.name }}-{{ ansible_hostname }} \
+    docker run --rm --name={{ bench.name }}-{{ inventory_hostname }} \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ bench.args | default("") }}
@@ -85,6 +85,6 @@
   when: 'bench.measure_runtime | default(true)'
 
 - name: record elapsed time in output folder
-  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" > {{results_path | default("./results/")}}/runtime_{{bench.name}}_{{ansible_hostname}}
+  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" > {{results_path | default("./results/")}}/runtime_{{bench.name}}_{{inventory_hostname}}
   when: 'bench.measure_runtime | default(true)'
   run_once: true

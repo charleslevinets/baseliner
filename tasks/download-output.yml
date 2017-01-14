@@ -1,7 +1,7 @@
 ---
 - name: initialize string for path
   set_fact:
-    output_folder: '{{ results_path | default("./results/") }}/benchmark/{{ bench.name }}/machine/{{ ansible_hostname }}'
+    output_folder: '{{ results_path | default("./results/") }}/benchmark/{{ bench.name }}/machine/{{ inventory_hostname }}'
 
 - name: add key/value pairs for each parameter (if any)
   set_fact:
