@@ -14,7 +14,6 @@
     module: file
     path: '{{ output_folder }}'
     state: directory
-  run_once: true
 
 - name: get any bench-specific files
   synchronize:
