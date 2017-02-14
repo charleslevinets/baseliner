@@ -4,10 +4,15 @@
     that:
     - 'benchmarks is defined'
 
+- name: create results path variable if it wasn't provided
+  set_fact:
+    results_path: "./results/"
+  when: results_path not defined
+
 - name: ensure benchmark output folder exists
   local_action:
     module: file
-    path: '{{ results_path | default("./results/") }}'
+    path: '{{ results_path }}'
     state: directory
 
 - name: start monitoring
