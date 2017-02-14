@@ -7,7 +7,7 @@
 - name: create results path variable if it wasn't provided
   set_fact:
     results_path: "./results/"
-  when: results_path not defined
+  when: 'results_path is undefined'
 
 - name: ensure benchmark output folder exists
   local_action:
