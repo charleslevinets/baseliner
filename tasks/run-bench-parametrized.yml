@@ -18,6 +18,10 @@
   include: run-container.yml
   when: 'bench.image is defined'
 
+- name: run compose benchmark
+  include: run-compose.yml
+  when: 'bench.compose is defined'
+
 - name: run script benchmark
   include: run-script.yml
   when: 'bench.script is defined'

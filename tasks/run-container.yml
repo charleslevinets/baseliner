@@ -76,7 +76,7 @@
     docker run --rm --name={{ bench.name }}-{{ inventory_hostname }} \
       {{ docker_flags }} \
       {{ bench.image }} \
-      {{ bench.args | default("") }}
+      {{ bench.command | default("") }}
 
 - name: record time after execution
   local_action: command date +%s

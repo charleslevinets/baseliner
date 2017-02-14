@@ -1,0 +1,18 @@
+---
+- name: pull compose image
+  command: 'docker pull docker/compose:1.11.1'
+
+- name: write compose file
+  copy:
+    content: "{{ bench.compose | to_nice_yaml }}"
+    dest: "/tmp/docker-compose.yml"
+
+- name: run compose
+  shell: >
+    docker run --rm --name=compose \
+      --volume /tmp/docker-compose.yml:/docker-compose.yml \
+      --volume `which docker`:/usr/bin/docker \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7 \
+      docker/compose:1.11.1 up \
+        --force-recreate --abort-on-container-exit
