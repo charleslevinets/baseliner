@@ -6,13 +6,6 @@
   set_fact:
     docker_flags: ''
 
-- name: stop container
-  shell: 'docker stop $(docker ps -aq --filter ancestor={{ bench.image }})'
-  ignore_errors: true
-- name: remove container
-  shell: 'docker rm $(docker ps -aq --filter ancestor={{ bench.image }})'
-  ignore_errors: true
-
 - name: add environment to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'

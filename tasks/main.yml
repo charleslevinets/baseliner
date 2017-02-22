@@ -1,4 +1,8 @@
 ---
+- name: stop any running container
+  shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"
+  ignore_errors: true
+
 - name: ensure benchmarks dict exists
   assert:
     that:
@@ -8,6 +12,18 @@
   set_fact:
     results_path: "./results/"
   when: 'results_path is undefined'
+
+- name: remove remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: absent
+  become: true
+
+- name: create remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: directory
+    mode: 0755
 
 - name: ensure benchmark output folder exists
   local_action:
