@@ -24,5 +24,5 @@
   when: 'bench.measure_runtime | default(false)'
 
 - name: record elapsed time in output folder
-  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}})) >> {{results_folder}}/runtime
+  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}})) >> {{local_results_folder}}/runtime
   when: 'bench.measure_runtime | default(false)'

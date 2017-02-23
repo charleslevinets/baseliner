@@ -5,7 +5,7 @@
 - name: output folder for metrics
   local_action:
     module: set_fact
-    metrics_folder: '{{ results_path }}/metrics'
+    metrics_folder: '{{ local_results_path }}/metrics'
   run_once: true
   with_items: '{{ groups.all }}'
   when: 'item != "localhost"'

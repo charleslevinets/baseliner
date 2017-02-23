@@ -1,0 +1,37 @@
+- name: run ldd on docker binary
+  command: ldd /usr/bin/docker
+  register: docker_ldd
+  ignore_errors: true
+  # ldd returns error passed a statically linked binary, so we ignore them
+
+- name: determine if found binary is already statically linked
+  set_fact:
+    install_static: '"not a dynamic executable" not in docker_ldd.stdout'
+
+- name: ensure curl is installed
+  package:
+    name: 'curl'
+    state: present
+  become: true
+  when: install_static
+
+- name: stop the docker daemon
+  service:
+    name: docker
+    state: stopped
+  become: true
+  when: install_static
+
+# TODO: install the version corresponding to the installed daemon
+- name: get statically linked docker tarball
+  command: curl -O https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz chdir=/tmp
+  when: install_static
+
+- name: untar statically linked docker tarball
+  command: tar xfz docker-latest.tgz chdir=/tmp
+  when: install_static
+
+- name: move statically linked docker to /usr/bin folder
+  shell: mv /tmp/docker/* /usr/bin/
+  become: true
+  when: install_static

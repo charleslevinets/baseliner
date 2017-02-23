@@ -1,0 +1,50 @@
+- name: ensure expected variables are defined
+  assert:
+    that:
+    - 'local_results_path is defined'
+    - 'remote_results_path is defined'
+    - 'benchmarks is defined'
+
+- name: create results path variable if it wasn't provided
+  set_fact:
+    local_results_path: "./results/"
+  when: 'local_results_path is undefined'
+
+- name: ensure results folder exists
+  local_action:
+    module: file
+    path: '{{ local_results_path }}'
+    state: directory
+    mode: 0755
+  run_once: true
+
+- name: remove remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: absent
+  become: true
+
+- name: create remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: directory
+    mode: 0755
+
+- name: ensure docker-engine is installed
+  package:
+    name: 'docker-engine'
+    state: present
+  become: true
+
+- name: install statically linked docker
+  include: install-docker-static-binary.yml
+
+- name: ensure the docker daemon is running
+  service:
+    name: docker
+    state: started
+  become: true
+
+- name: stop any running container
+  shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"
+  ignore_errors: true
