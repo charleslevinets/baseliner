@@ -62,7 +62,7 @@
   local_action: command date +%s
   register: time_before
   run_once: true
-  when: 'bench.measure_runtime | default(true)'
+  when: 'measure_runtime | default(true)'
 
 - name: run container
   shell: >
@@ -75,9 +75,9 @@
   local_action: command date +%s
   register: time_after
   run_once: true
-  when: 'bench.measure_runtime | default(true)'
+  when: 'measure_runtime | default(true)'
 
 - name: record elapsed time in output folder
   local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" > {{ local_results_path }}/runtime_{{bench.name}}_{{inventory_hostname}}
-  when: 'bench.measure_runtime | default(true)'
+  when: 'measure_runtime | default(true)'
   run_once: true

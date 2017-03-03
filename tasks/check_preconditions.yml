@@ -31,19 +31,23 @@
     mode: 0755
 
 - name: ensure docker-engine is installed
-  package:
-    name: 'docker-engine'
-    state: present
+  apt:
+    name: docker-engine
+    update_cache: yes
+    state: latest
   become: true
+  when: 'check_docker_package | default(false)'
 
 - name: install statically linked docker
   include: install-docker-static-binary.yml
+  when: 'install_statically_linked_docker | default(false)'
 
 - name: ensure the docker daemon is running
   service:
     name: docker
     state: started
   become: true
+  when: 'check_docker_package | default(false)'
 
 - name: stop any running container
   shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"

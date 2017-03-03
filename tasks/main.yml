@@ -1,4 +1,6 @@
 ---
+- include: check_preconditions.yml
+
 - name: start monitoring
   include: monitoring-start.yml
   when: '(enable_monitoring | default(false)) == true'
