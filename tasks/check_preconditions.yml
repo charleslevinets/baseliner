@@ -5,6 +5,29 @@
     - 'remote_results_path is defined'
     - 'benchmarks is defined'
 
+- name: ensure docker-engine is installed
+  apt:
+    name: docker-engine
+    update_cache: yes
+    state: latest
+  become: true
+  when: 'check_docker_package | default(false)'
+
+- name: install statically linked docker
+  include: install-docker-static-binary.yml
+  when: 'install_statically_linked_docker | default(false)'
+
+- name: ensure the docker daemon is running
+  service:
+    name: docker
+    state: started
+  become: true
+  when: 'check_docker_package | default(false)'
+
+- name: stop any running container
+  shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"
+  ignore_errors: true
+
 - name: create results path variable if it wasn't provided
   set_fact:
     local_results_path: "./results/"
@@ -29,26 +52,3 @@
     path: '{{ remote_results_path }}'
     state: directory
     mode: 0755
-
-- name: ensure docker-engine is installed
-  apt:
-    name: docker-engine
-    update_cache: yes
-    state: latest
-  become: true
-  when: 'check_docker_package | default(false)'
-
-- name: install statically linked docker
-  include: install-docker-static-binary.yml
-  when: 'install_statically_linked_docker | default(false)'
-
-- name: ensure the docker daemon is running
-  service:
-    name: docker
-    state: started
-  become: true
-  when: 'check_docker_package | default(false)'
-
-- name: stop any running container
-  shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"
-  ignore_errors: true
