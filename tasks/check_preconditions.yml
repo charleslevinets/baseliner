@@ -24,8 +24,12 @@
   become: true
   when: 'check_docker_package | default(false)'
 
+- name: remove containers to avoid name clashes
+  shell: "docker stop `docker ps -q`"
+  ignore_errors: true
+
 - name: stop any running container
-  shell: "docker stop `docker ps -q` || docker rm `docker ps -q`"
+  shell: "docker rm `docker ps -qa`"
   ignore_errors: true
 
 - name: create results path variable if it wasn't provided

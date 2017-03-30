@@ -14,6 +14,22 @@
   set_fact:
     bench: '{{ (defaults | default({})) | combine(benchmark) }}'
 
+- name: initialize string for path
+  set_fact:
+    output_folder: '{{ local_results_path }}/benchmark/{{ bench.name }}/machine/{{ inventory_hostname }}'
+
+- name: add key/value pairs for each parameter (if any)
+  set_fact:
+    output_folder: '{{ output_folder }}/{{ item.key }}/{{ item.value }}'
+  with_dict: '{{ params | default({}) }}'
+  when: '"hey_ho_lets_go" not in parameter_names'
+
+- name: ensure output folder exists
+  local_action:
+    module: file
+    path: '{{ output_folder }}'
+    state: directory
+
 - name: run containerized benchmark
   include: run-container.yml
   when: 'bench.image is defined'

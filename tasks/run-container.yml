@@ -58,26 +58,14 @@
     docker_flags: '{{ docker_flags }} --{{ item.key }}={{ item.value }}'
   with_dict: '{{ bench.limits | default({}) }}'
 
-- name: record time before execution
-  local_action: command date +%s
-  register: time_before
-  run_once: true
-  when: 'measure_runtime | default(true)'
-
 - name: run container
   shell: >
     docker run --rm --name={{ bench.name }}-{{ inventory_hostname }} \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ bench.command | default("") }}
-
-- name: record time after execution
-  local_action: command date +%s
-  register: time_after
-  run_once: true
-  when: 'measure_runtime | default(true)'
+  register: docker_run
 
 - name: record elapsed time in output folder
-  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}}))" > {{ local_results_path }}/runtime_{{bench.name}}_{{inventory_hostname}}
+  local_action: shell echo "{{ docker_run.delta }}" > {{ output_folder }}/runtime
   when: 'measure_runtime | default(true)'
-  run_once: true
