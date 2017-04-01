@@ -60,7 +60,7 @@
 
 - name: run container
   shell: >
-    docker run --rm --name={{ bench.name }}-{{ inventory_hostname }} \
+    docker run --rm --name={{ run_id }} \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ bench.command | default("") }}

@@ -17,10 +17,12 @@
 - name: initialize string for path
   set_fact:
     output_folder: '{{ local_results_path }}/benchmark/{{ bench.name }}/machine/{{ inventory_hostname }}'
+    run_id: '{{ bench.name }}-{{ inventory_hostname }}'
 
 - name: add key/value pairs for each parameter (if any)
   set_fact:
     output_folder: '{{ output_folder }}/{{ item.key }}/{{ item.value }}'
+    run_id: '{{ run_id }}-{{ item.key }}-{{ item.value }}'
   with_dict: '{{ params | default({}) }}'
   when: '"hey_ho_lets_go" not in parameter_names'
 
