@@ -58,6 +58,13 @@
     docker_flags: '{{ docker_flags }} --{{ item.key }}={{ item.value }}'
   with_dict: '{{ bench.limits | default({}) }}'
 
+- name: start container monitor
+  shell: >
+    docker run -d -v /tmp:/tmp -v /sys:/sys \
+        ivotron/container-monitor \
+          `docker inspect --format="{{.Id}}" run_id`
+  when: 'gather_container_metrics | default(false)'
+
 - name: run container
   shell: >
     docker run --rm --name={{ run_id }} \
@@ -65,6 +72,10 @@
       {{ bench.image }} \
       {{ bench.command | default("") }}
   register: docker_run
+
+- name: record container metrics
+  local_action: cp /tmp/testmetrics.json {{ output_folder }}
+  when: 'gather_container_metrics | default(false)'
 
 - name: record elapsed time in output folder
   local_action: shell echo "{{ docker_run.delta }}" > {{ output_folder }}/runtime

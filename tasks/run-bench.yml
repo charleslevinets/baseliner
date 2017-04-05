@@ -1,6 +1,6 @@
 ---
 - name: upload files
-  copy:
+  synchronize:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
   with_items: '{{ benchmark.put | default([]) }}'
