@@ -58,23 +58,35 @@
     docker_flags: '{{ docker_flags }} --{{ item.key }}={{ item.value }}'
   with_dict: '{{ bench.limits | default({}) }}'
 
-- name: start container monitor
+- name: create container
   shell: >
-    docker run -d -v /tmp:/tmp -v /sys:/sys \
-        ivotron/container-monitor \
-          `docker inspect --format="{{.Id}}" run_id`
-  when: 'gather_container_metrics | default(false)'
-
-- name: run container
-  shell: >
-    docker run --rm --name={{ run_id }} \
+    docker create --rm --name={{ run_id }} \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ bench.command | default("") }}
+
+- name: start container monitor
+  shell: >
+    docker pull ivotron/container-monitor && \
+    docker run -d \
+        -e CONTAINER_ID=`docker inspect --format '{{'{{'}}.Id{{'}}'}}' {{ run_id }}` \
+        --privileged \
+        -v /tmp:/tmp \
+        -v /sys:/sys \
+        ivotron/container-monitor
+  when: 'gather_container_metrics | default(false)'
+
+- name: run container
+  shell: docker start {{ run_id }}
+
+- name: wait for container to finish
+  shell: docker wait {{ run_id }}
+  async: 108000
+  poll: 60
   register: docker_run
 
 - name: record container metrics
-  local_action: cp /tmp/testmetrics.json {{ output_folder }}
+  command: cp /tmp/testmetrics.json {{ output_folder }}
   when: 'gather_container_metrics | default(false)'
 
 - name: record elapsed time in output folder
