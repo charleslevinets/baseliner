@@ -58,20 +58,19 @@
     docker_flags: '{{ docker_flags }} --{{ item.key }}={{ item.value }}'
   with_dict: '{{ bench.limits | default({}) }}'
 
-- name: create container
+- name: set privileged mode
+  set_fact:
+    docker_flags: '{{ docker_flags }} --privileged'
+  when: 'bench.privileged | default(False)'
+
+- name: run container
   shell: >
-    docker create --rm --name={{ run_id }} \
+    docker run --rm \
       {{ docker_flags }} \
       {{ bench.image }} \
       {{ bench.command | default("") }}
-
-- name: run container
-  shell: docker start {{ run_id }}
-
-- name: wait for container to finish
-  shell: docker wait {{ run_id }}
-  async: 108000
-  poll: 60
+  async: 10800
+  poll: 20
   register: docker_run
 
 - name: record elapsed time in output folder
