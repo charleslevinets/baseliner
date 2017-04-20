@@ -58,6 +58,16 @@
     docker_flags: '{{ docker_flags }} --{{ item.key }}={{ item.value }}'
   with_dict: '{{ bench.limits | default({}) }}'
 
+- name: add capabilities
+  set_fact:
+    docker_flags: '{{ docker_flags }} --cap-add={{ bench.cap_add | join(', ') }}'
+  when: 'bench.cap_add is defined'
+
+- name: remove capabilities
+  set_fact:
+    docker_flags: '{{ docker_flags }} --cap-drop={{ bench.cap_drop | join(', ') }}'
+  when: 'bench.cap_drop is defined'
+
 - name: set privileged mode
   set_fact:
     docker_flags: '{{ docker_flags }} --privileged'
