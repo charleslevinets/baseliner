@@ -9,7 +9,7 @@
 - name: add environment to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
-  with_dict: '{{ bench.env | default({}) }}'
+  with_dict: '{{ bench.environment | default({}) }}'
 - name: add implicit environment from params variable
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}={{ item.value }}'
@@ -17,7 +17,7 @@
 
 - name: check if we have host-specific environment
   set_fact:
-    env_host_map: '{{ bench.env_host | default({}) }}'
+    env_host_map: '{{ bench.environment_host | default({}) }}'
 - name: add host-specific environment to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
@@ -60,12 +60,12 @@
 
 - name: add capabilities
   set_fact:
-    docker_flags: '{{ docker_flags }} --cap-add={{ bench.cap_add | join(', ') }}'
+    docker_flags: '{{ docker_flags }} --cap-add={{ bench.cap_add | join(",") }}'
   when: 'bench.cap_add is defined'
 
 - name: remove capabilities
   set_fact:
-    docker_flags: '{{ docker_flags }} --cap-drop={{ bench.cap_drop | join(', ') }}'
+    docker_flags: '{{ docker_flags }} --cap-drop={{ bench.cap_drop | join(",") }}'
   when: 'bench.cap_drop is defined'
 
 - name: set privileged mode

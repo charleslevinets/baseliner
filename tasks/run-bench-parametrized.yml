@@ -1,4 +1,16 @@
 ---
+- name: remove remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: absent
+  become: true
+
+- name: create remote results folder
+  file:
+    path: '{{ remote_results_path }}'
+    state: directory
+    mode: 0755
+
 - name: initialize parameter dictionary
   set_fact:
     params: {}
