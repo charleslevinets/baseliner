@@ -73,16 +73,22 @@
     docker_flags: '{{ docker_flags }} --privileged'
   when: 'bench.privileged | default(False)'
 
+- debug:
+    msg: 'Running docker command: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
+
 - name: run container
-  shell: >
-    docker run --rm \
-      {{ docker_flags }} \
-      {{ bench.image }} \
-      {{ bench.command | default("") }}
+  shell: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
+  register: docker_run
+  changed_when: "docker_run.rc >= 0" # hack
   async: 10800
   poll: 20
-  register: docker_run
 
 - name: record elapsed time in output folder
   local_action: shell echo "{{ docker_run.delta }}" > {{ output_folder }}/runtime
   when: 'measure_runtime | default(true)'
+
+- name: capture stdout
+  local_action: shell echo "{{ docker_run.stdout }}" > {{ output_folder }}/std.out
+
+- name: capture stderr
+  local_action: shell echo "{{ docker_run.stderr }}" > {{ output_folder }}/std.err
