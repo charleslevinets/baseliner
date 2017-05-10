@@ -10,10 +10,10 @@
   set_fact:
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
   with_dict: '{{ bench.environment | default({}) }}'
-- name: add implicit environment from params variable
+- name: add implicit environment from bench_params variable
   set_fact:
-    docker_flags: '{{ docker_flags }} -e {{ item.key }}={{ item.value }}'
-  with_dict: '{{ params | default({}) }}'
+    docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
+  with_dict: '{{ bench_params | default({}) }}'
 
 - name: check if we have host-specific environment
   set_fact:
@@ -78,6 +78,7 @@
 
 - name: run container
   shell: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
+  environment: '{{ bench_params }}'
   async: 10800
   poll: 20
   register: docker_run_async
