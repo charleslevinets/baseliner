@@ -79,7 +79,7 @@
 - name: run container
   shell: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
   environment: '{{ bench_params }}'
-  async: 10800
+  async: '{{ test_timeout | default(10800) }}'
   poll: 20
   register: docker_run_async
 
