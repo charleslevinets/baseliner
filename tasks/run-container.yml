@@ -73,6 +73,11 @@
     docker_flags: '{{ docker_flags }} --privileged'
   when: 'bench.privileged | default(False)'
 
+- name: set parent cgroup
+  set_fact:
+    docker_flags: '{{ docker_flags }} --cgroup-parent={{ bench.cgroup_parent }}'
+  when: 'bench.cgroup_parent is defined'
+
 - debug:
     msg: 'Running docker command: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
 
