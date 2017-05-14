@@ -5,6 +5,11 @@
   include: monitoring-start.yml
   when: '(enable_monitoring | default(false)) == true'
 
+- name: get number of repetitions
+  set_fact:
+    num_repetitions: '{{ (num_repetitions | default([])) + [ item ] }}'
+  with_sequence: count='{{ repetitions | default(1) }}'
+
 - name: execute each benchmark
   include: run-bench.yml
   with_items: '{{ benchmarks }}'

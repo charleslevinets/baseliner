@@ -5,16 +5,16 @@
     dest: '{{ item.dest }}'
   with_items: '{{ benchmark.put | default([]) }}'
 
-- name: initialize parameter lists
+- name: initialize parameters and add number of repetitions
   set_fact:
-    parameter_names: []
-    parameter_list: []
+    parameter_names: '{{ ( parameter_names | default([]) ) + [ "repetition" ] }}'
+    parameter_list: '{{ ( parameter_list | default([]) ) + [ num_repetitions ] }}'
 
 - name: unnest parameters when parameters for benchmark were passed
   set_fact:
     parameter_names: '{{ parameter_names + [item.key] }}'
     parameter_list: '{{ parameter_list + [item.value] }}'
-  with_dict: '{{ benchmark.parameters | default({"hey_ho_lets_go": 1}) }}'
+  with_dict: '{{ benchmark.parameters | default({}) }}'
 
 - name: parametrized execution
   include: run-bench-parametrized.yml

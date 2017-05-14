@@ -36,7 +36,6 @@
     output_folder: '{{ output_folder }}/{{ item.key }}/{{ item.value }}'
     run_id: '{{ run_id }}-{{ item.key }}-{{ item.value }}'
   with_dict: '{{ bench_params | default({}) }}'
-  when: '"hey_ho_lets_go" not in parameter_names'
 
 - name: ensure output folder exists
   local_action:
