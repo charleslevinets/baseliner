@@ -7,6 +7,14 @@
     content: '{{ bench.compose | to_yaml | regex_replace("cpu_quota: ''([0-9]+)''", "cpu_quota: \1") }}'
     dest: "/tmp/docker-compose.yml"
 
+- name: pull images
+  shell: >
+    docker run --rm --name=compose \
+      --volume `which docker`:/usr/bin/docker \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      --volume /tmp/docker-compose.yml:/docker-compose.yml \
+      docker/compose:1.11.1 pull
+
 - name: run compose
   shell: >
     docker run --rm --name=compose \
@@ -15,3 +23,30 @@
       --volume /tmp/docker-compose.yml:/docker-compose.yml \
       docker/compose:1.11.1 up \
         --force-recreate --abort-on-container-exit
+  async: '{{ test_timeout | default(10800) }}'
+  poll: 20
+  register: docker_compose_async
+
+- name: get output
+  async_status:
+    jid: '{{ docker_compose_async.ansible_job_id }}'
+  register: docker_compose_result
+
+- name: record elapsed time in output folder
+  local_action:
+    module: copy
+    content: '{{ docker_compose_result.delta }}'
+    dest: '{{ output_folder }}/runtime'
+  when: 'measure_runtime | default(true)'
+
+- name: capture stdout
+  local_action:
+    module: copy
+    content: '{{ docker_compose_result.stdout }}'
+    dest: '{{ output_folder }}/std.out'
+
+- name: capture stderr
+  local_action:
+    module: copy
+    content: '{{ docker_compose_result.stderr }}'
+    dest: '{{ output_folder }}/std.err'

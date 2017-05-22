@@ -5,6 +5,7 @@
     state: present
   when: '{{ install_facter | default(true)}}'
   become: true
+  ignore_errors: true
 
 - name: create facts folder if it doesn't exist
   local_action:
