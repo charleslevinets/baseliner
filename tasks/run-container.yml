@@ -1,6 +1,15 @@
 ---
+- name: check if image already exists
+  shell: 'docker images | grep {{ bench.image }} | wc -l'
+  register: image_exists
+
 - name: pull image
   command: 'docker pull {{ bench.image }}'
+  register: dockerpull_cmd
+  failed_when:
+  - dockerpull_cmd.rc != 0
+  - image_exists.rc == 1
+  - not {{ ignore_pull_error_if_image_exists | default(false) }}
 
 - name: initialize docker_flags variable
   set_fact:
