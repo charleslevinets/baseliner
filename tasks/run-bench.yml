@@ -7,8 +7,8 @@
 
 - name: initialize parameters and add number of repetitions
   set_fact:
-    parameter_names: '{{ ( parameter_names | default([]) ) + [ "repetition" ] }}'
-    parameter_list: '{{ ( parameter_list | default([]) ) + [ num_repetitions ] }}'
+    parameter_names: ["repetition"]
+    parameter_list: '{{ [ num_repetitions ] }}'
 
 - name: unnest parameters when parameters for benchmark were passed
   set_fact:
