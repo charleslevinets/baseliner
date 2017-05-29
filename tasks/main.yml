@@ -1,6 +1,10 @@
 ---
 - include: check_preconditions.yml
 
+- name: store facts
+  include: store-facts.yml
+  when: '{{ store_facts | default(true) }}'
+
 - name: start monitoring
   include: monitoring-start.yml
   when: '(enable_monitoring | default(false)) == true'
@@ -15,10 +19,6 @@
   with_items: '{{ benchmarks }}'
   loop_control:
     loop_var: benchmark
-
-- name: store facts
-  include: store-facts.yml
-  when: '{{ store_facts | default(true) }}'
 
 - name: stop monitoring
   include: monitoring-stop.yml
