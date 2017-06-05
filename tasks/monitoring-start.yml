@@ -17,10 +17,6 @@
     state: directory
   run_once: true
 
-- name: remove existing cmetrics
-  local_action: command rm -fr {{ metrics_folder }}/cmetrics/
-  run_once: true
-
 - name: create target list for prometheus
   local_action:
     module: set_fact
@@ -33,15 +29,15 @@
   local_action:
     module: template
     src: prometheus.yml.j2
-    dest: /tmp/prometheus.yml
+    dest: '{{ metrics_folder }}/prometheus.yml'
   run_once: true
 
 - name: start prometheusdb in localhost
   local_action: shell
     docker run -d --net=host \
       --name=prometheus \
-      --volume={{ metrics_folder }}/cmetrics:/prometheus \
-      --volume=/tmp/prometheus.yml:/tmp/prometheus.yml \
+      --volume={{ metrics_folder }}/prometheus:/prometheus \
+      --volume={{ metrics_folder }}/prometheus.yml:/tmp/prometheus.yml \
       prom/prometheus \
         -storage.local.path=/prometheus \
         -storage.local.checkpoint-interval=2m0s \
@@ -51,7 +47,7 @@
 - name: wait for timeseries db to start
   pause: seconds=10
 
-- name: start cadvisor on each node
+- name: start cadvisor
   shell: >
     docker run -d -p 8080:8080 \
       --name=cadvisor \
