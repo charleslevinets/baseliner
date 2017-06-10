@@ -4,6 +4,7 @@
     src: '{{ item }}/'
     dest: '{{ output_folder }}/'
     mode: pull
+    use_ssh_args: yes
   with_items: '{{ bench.fetch | default([])}}'
   become: true
 
