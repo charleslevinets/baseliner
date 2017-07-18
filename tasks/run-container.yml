@@ -101,17 +101,12 @@
 - name: fail if timeout is less than 60 sec
   fail:
     msg: 'minimum timeout for a test is 60 seconds'
-  when: '{{ (test_timeout | default(10800)) < 60 }}'
+  when: '(test_timeout | default(10800)) < 60'
 
 - name: set 600 sec delay for long-running tasks
   set_fact:
     check_status_delay: 600
-  when: '{{ (test_timeout | default(10800)) > 43200 }}'
-
-- debug:
-    msg: 'test_timeout: {{ test_timeout }}
-check_status_delay: {{ check_status_delay | default(60) }}
-retries: {{ ((test_timeout | default(10800)) / (check_status_delay | default(60))) | int }}'
+  when: '(test_timeout | default(10800)) > 43200'
 
 - name: check status
   async_status:
