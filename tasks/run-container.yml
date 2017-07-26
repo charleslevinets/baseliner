@@ -82,6 +82,16 @@
     docker_flags: '{{ docker_flags }} --privileged'
   when: 'bench.privileged | default(False)'
 
+- name: set memory constraint
+  set_fact:
+    docker_flags: '{{ docker_flags }} --memory={{ bench.memory }}'
+  when: 'bench.memory is defined'
+
+- name: set memory-swap constraint
+  set_fact:
+    docker_flags: '{{ docker_flags }} --memory-swap={{ bench.memory_swap }}'
+  when: 'bench.memory_swap is defined'
+
 - name: set parent cgroup
   set_fact:
     docker_flags: '{{ docker_flags }} --cgroup-parent={{ bench.cgroup_parent }}'
