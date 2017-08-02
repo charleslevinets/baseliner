@@ -103,7 +103,7 @@
 - name: run container
   shell: docker run --name baseliner --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
   environment: '{{ bench_params }}'
-  async: '{{ test_timeout | default(10800) }}'
+  async: '{{ bench.test_timeout | default(test_timeout | default(10800)) }}'
   poll: 0
   register: docker_run_async_result
   ignore_errors: true
