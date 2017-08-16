@@ -104,40 +104,40 @@
   shell: docker run --name baseliner --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
   environment: '{{ bench_params }}'
   async: '{{ bench.test_timeout | default(test_timeout | default(10800)) }}'
-  poll: 0
+  poll: 60
   register: docker_run_async_result
   ignore_errors: true
 
-- name: fail if timeout is less than 60 sec
-  fail:
-    msg: 'minimum timeout for a test is 60 seconds'
-  when: '(test_timeout | default(10800)) < 60'
-
-- name: set 600 sec delay for long-running tasks
-  set_fact:
-    check_status_delay: 600
-  when: '(test_timeout | default(10800)) > 43200'
-
-- name: check status
+- name: get status of async task
   async_status:
     jid: '{{ docker_run_async_result.ansible_job_id }}'
   register: docker_run_result
-  retries: '{{ ((test_timeout | default(10800)) / (check_status_delay | default(60))) | int }}'
-  delay: '{{ check_status_delay | default(60) }}'
-  until: docker_run_result.finished
+  when:
+  - 'docker_run_async_result is defined'
+  - 'docker_run_async_result.ansible_job_id is defined'
   ignore_errors: true
 
 - name: stop running container if timedout
   shell: 'docker stop baseliner || docker rm -f baseliner'
-  when: 'not docker_run_result.finished'
+  when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
+  - 'not docker_run_result.finished'
   ignore_errors: true
 
 - debug:
     msg: 'WARNING: test timed out and we killed it.'
-  when: 'not docker_run_result.finished'
+  when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
+  - 'not docker_run_result.finished'
 - debug:
     msg: 'WARNING: test terminated with non-zero exit code.'
-  when: 'docker_run_result.finished and docker_run_result.rc != 0'
+  when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
+  - 'docker_run_result.finished'
+  - 'docker_run_result.rc != 0'
 
 - name: record elapsed time in output folder
   local_action:
@@ -145,19 +145,26 @@
     content: '{{ docker_run_result.delta }}'
     dest: '{{ output_folder }}/runtime'
   when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
   - 'docker_run_result.finished'
-  - 'measure_runtime | default(true)'
 
 - name: capture stdout
   local_action:
     module: copy
     content: '{{ docker_run_result.stdout }}'
     dest: '{{ output_folder }}/std.out'
-  when: 'docker_run_result.finished'
+  when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
+  - 'docker_run_result.finished'
 
 - name: capture stderr
   local_action:
     module: copy
     content: '{{ docker_run_result.stderr }}'
     dest: '{{ output_folder }}/std.err'
-  when: 'docker_run_result.finished'
+  when:
+  - 'docker_run_result is defined'
+  - 'docker_run_result.finished is defined'
+  - 'docker_run_result.finished'
