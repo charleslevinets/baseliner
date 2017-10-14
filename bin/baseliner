@@ -1,0 +1,60 @@
+#!/bin/bash
+
+print_usage() {
+  echo "Usage: baseliner -i <inventory> [-f <conf>] [-a extra-args]"
+  echo ""
+  echo "Flags:"
+  echo "  -i <inventory> inventory file passed to ansible (default: ./hosts)"
+  echo "  -f <conf>      baseliner configuration file (default: ./config.yml)"
+  echo "  -a <string>    extra arguments for 'ansible-playbook'"
+  exit $1
+}
+
+extra_args=""
+config_file="./config.yml"
+inventory="./hosts"
+
+while getopts ":f:a:h" o; do
+  case "${o}" in
+    a)
+      extra_args="${OPTARG}"
+      ;;
+    f)
+      config_file="${OPTARG}"
+      ;;
+    i)
+      inventory="${OPTARG}"
+      ;;
+    h)
+      print_usage 0
+      ;;
+    *)
+      print_usage 1
+      ;;
+  esac
+done
+
+cat >ansible.cfg <<EOL
+[defaults]
+timeout = 120
+retry_files_enabled = False
+host_key_checking = False
+EOL
+
+export ANSIBLE_LOG_PATH=`pwd`/ansible.log
+
+cat >playbook.yml <<EOL
+- hosts: all
+  roles:
+  - baseliner
+EOL
+
+echo '' > ansible.log
+
+ansible-playbook \
+  $extra_args \
+  -i $inventory \
+  -e @$config_file \
+  ./playbook.yml
+
+rm -f ansible.cfg playbook.yml
