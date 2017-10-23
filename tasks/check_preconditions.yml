@@ -1,8 +1,6 @@
 - name: ensure expected variables are defined
   assert:
     that:
-    - 'local_results_path is defined'
-    - 'remote_results_path is defined'
     - 'benchmarks is defined'
 
 - name: ensure docker-engine is installed
@@ -32,10 +30,10 @@
   shell: "docker rm `docker ps -qa`"
   ignore_errors: true
 
-- name: create results path variable if it wasn't provided
+- name: set default values
   set_fact:
-    local_results_path: "./results/"
-  when: 'local_results_path is undefined'
+    local_results_path: '{{ local_results_path | default(""./results/") }}'
+    remote_results_path: '{{ remote_results_path | default(""/tmp/results/") }}'
 
 - name: ensure results folder exists
   local_action:
