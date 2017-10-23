@@ -44,17 +44,17 @@
     state: directory
 
 - name: run containerized benchmark
-  include: run-container.yml
+  include_tasks: run-container.yml
   when: 'bench.image is defined'
 
 - name: run compose benchmark
-  include: run-compose.yml
+  include_tasks: run-compose.yml
   when: 'bench.compose is defined'
 
 - name: run script benchmark
-  include: run-script.yml
+  include_tasks: run-script.yml
   when: 'bench.script is defined'
 
 - name: download results
-  include: download-output.yml
+  include_tasks: download-output.yml
   when: 'bench.fetch is defined'

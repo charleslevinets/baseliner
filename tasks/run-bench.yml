@@ -17,7 +17,7 @@
   with_dict: '{{ benchmark.parameters | default({}) }}'
 
 - name: parametrized execution
-  include: run-bench-parametrized.yml
+  include_tasks: run-bench-parametrized.yml
   with_cartesian: '{{ parameter_list }}'
   loop_control:
     loop_var: parameter_values

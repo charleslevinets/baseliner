@@ -1,12 +1,12 @@
 ---
-- include: check_preconditions.yml
+- include_tasks: check_preconditions.yml
 
 - name: store facts
-  include: store-facts.yml
+  include_tasks: store-facts.yml
   when: '{{ store_facts | default(true) }}'
 
 - name: start monitoring
-  include: monitoring-start.yml
+  include_tasks: monitoring-start.yml
   when: '(enable_monitoring | default(false)) == true'
 
 - name: get number of repetitions
@@ -15,11 +15,11 @@
   with_sequence: count='{{ repetitions | default(1) }}'
 
 - name: execute each benchmark
-  include: run-bench.yml
+  include_tasks: run-bench.yml
   with_items: '{{ benchmarks }}'
   loop_control:
     loop_var: benchmark
 
 - name: stop monitoring
-  include: monitoring-stop.yml
+  include_tasks: monitoring-stop.yml
   when: '(enable_monitoring | default(false)) == true'

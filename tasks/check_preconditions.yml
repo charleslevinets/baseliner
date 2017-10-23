@@ -12,7 +12,7 @@
   when: 'check_docker_package | default(false)'
 
 - name: install statically linked docker
-  include: install-docker-static-binary.yml
+  include_tasks: install-docker-static-binary.yml
   when: 'install_statically_linked_docker | default(false)'
 
 - name: ensure the docker daemon is running
@@ -32,8 +32,8 @@
 
 - name: set default values
   set_fact:
-    local_results_path: '{{ local_results_path | default(""./results/") }}'
-    remote_results_path: '{{ remote_results_path | default(""/tmp/results/") }}'
+    local_results_path: '{{ local_results_path | default("./results/") }}'
+    remote_results_path: '{{ remote_results_path | default("/tmp/results/") }}'
 
 - name: ensure results folder exists
   local_action:
