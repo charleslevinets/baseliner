@@ -1,3 +1,5 @@
 *.sw?
 ansible.log
 .ropeproject
+test
+Dockerfile

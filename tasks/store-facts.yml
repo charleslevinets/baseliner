@@ -3,7 +3,7 @@
   package:
     name: facter
     state: present
-  when: {{ install_facter | default(true)}}
+  when: install_facter | default(true)
   become: true
   ignore_errors: true
 

@@ -1,4 +1,4 @@
-FROM ivotron/ansible:2.2.1.0
+FROM ivotron/ansible:2.4.0.0-alpine3
 
 ADD . /etc/ansible/roles/baseliner
 

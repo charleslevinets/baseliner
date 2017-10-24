@@ -60,12 +60,13 @@ cat >playbook.yml <<EOL
   - baseliner
 EOL
 
-echo '' > ansible.log
+echo '' > baseliner.log
 
 ansible-playbook \
   -i "${inventory}" \
   -e @"${config_file}" \
   -e local_results_path="$results_dir" \
+  -e remote_results_path="/tmp/results" \
   ${extra_args} \
   ./playbook.yml
 
