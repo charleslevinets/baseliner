@@ -52,7 +52,7 @@ if [ -n "${ANSIBLE_ROLES_PATH}" ]; then
   echo "roles_path = ${ANSIBLE_ROLES_PATH}" >> ansible.cfg
 fi
 
-export ANSIBLE_LOG_PATH=`pwd`/baseliner.log
+export ANSIBLE_LOG_PATH="$results_dir/baseliner.log"
 
 cat >playbook.yml <<EOL
 - hosts: all
