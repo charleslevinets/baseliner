@@ -2,20 +2,22 @@
 set -ex
 
 print_usage() {
-  echo "Usage: baseliner -i <inventory> [-f <conf>] [-a extra-args]"
+  echo "Usage: baseliner -i <inventory> [-o dir] [-f <conf>] [-a extra-args]"
   echo ""
   echo "Flags:"
-  echo "  -i <inventory> inventory file passed to ansible (default: ./hosts)"
-  echo "  -f <conf>      baseliner configuration file (default: ./config.yml)"
-  echo "  -a <string>    extra arguments for 'ansible-playbook'"
+  echo "  -i <inventory> inventory file passed to ansible (default: ./hosts)."
+  echo "  -f <conf>      baseliner configuration file (default: ./config.yml)."
+  echo "  -a <extra-arg> extra arguments for 'ansible-playbook' (default: '')."
+  echo "  -o <out-dir>   output directory (default: ./results)."
   exit $1
 }
 
 extra_args=""
 config_file="./config.yml"
 inventory="./hosts"
+results_dir="./results"
 
-while getopts ":f:a:i:h" o; do
+while getopts ":f:a:o:i:h" o; do
   case "${o}" in
     a)
       extra_args="${OPTARG}"
@@ -25,6 +27,9 @@ while getopts ":f:a:i:h" o; do
       ;;
     i)
       inventory="${OPTARG}"
+      ;;
+    o)
+      results_dir="${OPTARG}"
       ;;
     h)
       print_usage 0
@@ -57,6 +62,11 @@ EOL
 
 echo '' > ansible.log
 
-ansible-playbook -i "${inventory}" -e @"${config_file}" ${extra_args} ./playbook.yml
+ansible-playbook \
+  -i "${inventory}" \
+  -e @"${config_file}" \
+  -e local_results_path="$results_dir" \
+  ${extra_args} \
+  ./playbook.yml
 
 rm -f ansible.cfg playbook.yml
