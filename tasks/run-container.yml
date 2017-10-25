@@ -40,12 +40,12 @@
 - name: add network mode to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} --net={{ bench.network_mode }}'
-  when: 'bench.network_mode is defined'
+  when: bench.network_mode is defined
 
 - name: add ipc mode to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} --ipc={{ bench.ipc }}'
-  when: 'bench.ipc is defined'
+  when: bench.ipc is defined
 
 - name: add ports to docker_flags
   set_fact:
@@ -60,7 +60,7 @@
 - name: set entrypoint
   set_fact:
     docker_flags: '{{ docker_flags }} --entrypoint={{ bench.entrypoint }}'
-  when: 'bench.entrypoint is defined'
+  when: bench.entrypoint is defined
 
 - name: set limits
   set_fact:
@@ -70,32 +70,32 @@
 - name: add capabilities
   set_fact:
     docker_flags: '{{ docker_flags }} --cap-add={{ bench.cap_add | join(",") }}'
-  when: 'bench.cap_add is defined'
+  when: bench.cap_add is defined
 
 - name: remove capabilities
   set_fact:
     docker_flags: '{{ docker_flags }} --cap-drop={{ bench.cap_drop | join(",") }}'
-  when: 'bench.cap_drop is defined'
+  when: bench.cap_drop is defined
 
 - name: set privileged mode
   set_fact:
     docker_flags: '{{ docker_flags }} --privileged'
-  when: 'bench.privileged | default(False)'
+  when: bench.privileged | default(False)
 
 - name: set memory constraint
   set_fact:
     docker_flags: '{{ docker_flags }} --memory={{ bench.memory }}'
-  when: 'bench.memory is defined'
+  when: bench.memory is defined
 
 - name: set memory-swap constraint
   set_fact:
     docker_flags: '{{ docker_flags }} --memory-swap={{ bench.memory_swap }}'
-  when: 'bench.memory_swap is defined'
+  when: bench.memory_swap is defined
 
 - name: set parent cgroup
   set_fact:
     docker_flags: '{{ docker_flags }} --cgroup-parent={{ bench.cgroup_parent }}'
-  when: 'bench.cgroup_parent is defined'
+  when: bench.cgroup_parent is defined
 
 - debug:
     msg: 'Running docker command: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
@@ -113,31 +113,31 @@
     jid: '{{ docker_run_async_result.ansible_job_id }}'
   register: docker_run_result
   when:
-  - 'docker_run_async_result is defined'
-  - 'docker_run_async_result.ansible_job_id is defined'
+  - docker_run_async_result is defined
+  - docker_run_async_result.ansible_job_id is defined
   ignore_errors: true
 
 - name: stop running container if timedout
   shell: 'docker stop baseliner || docker rm -f baseliner'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'not docker_run_result.finished'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - not docker_run_result.finished
   ignore_errors: true
 
 - debug:
     msg: 'WARNING: test timed out and we killed it.'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'not docker_run_result.finished'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - not docker_run_result.finished
 - debug:
     msg: 'WARNING: test terminated with non-zero exit code.'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'docker_run_result.finished'
-  - 'docker_run_result.rc != 0'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - docker_run_result.finished
+  - docker_run_result.rc != 0
 
 - name: record elapsed time in output folder
   local_action:
@@ -145,9 +145,9 @@
     content: '{{ docker_run_result.delta }}'
     dest: '{{ output_folder }}/runtime'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'docker_run_result.finished'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - docker_run_result.finished
 
 - name: capture stdout
   local_action:
@@ -155,9 +155,9 @@
     content: '{{ docker_run_result.stdout }}'
     dest: '{{ output_folder }}/std.out'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'docker_run_result.finished'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - docker_run_result.finished
 
 - name: capture stderr
   local_action:
@@ -165,6 +165,6 @@
     content: '{{ docker_run_result.stderr }}'
     dest: '{{ output_folder }}/std.err'
   when:
-  - 'docker_run_result is defined'
-  - 'docker_run_result.finished is defined'
-  - 'docker_run_result.finished'
+  - docker_run_result is defined
+  - docker_run_result.finished is defined
+  - docker_run_result.finished

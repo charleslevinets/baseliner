@@ -8,7 +8,7 @@
     metrics_folder: '{{ local_results_path }}/metrics'
   run_once: true
   with_items: '{{ groups.all }}'
-  when: 'item != "localhost"'
+  when: item != "localhost"
 
 - name: ensure output folder exists
   local_action:
@@ -23,7 +23,7 @@
     prometheus_targets: "{{ ( prometheus_targets | default([]) ) + [item+':9100', item+':8080'] }}"
   run_once: true
   with_items: '{{ groups.all }}'
-  when: 'item != "localhost"'
+  when: item != "localhost"
 
 - name: create prometheus config file
   local_action:

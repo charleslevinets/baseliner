@@ -13,5 +13,5 @@
     path: '{{ item }}/'
     state: absent
   with_items: '{{ bench.fetch | default([])}}'
-  when: '{{ remove_benchmark_output | default(true) }}'
+  when: remove_benchmark_output | default(true)
   become: true
