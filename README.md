@@ -15,9 +15,12 @@ This role expects certain variables to be defined:
         optional variables are `network_mode`, `command`, `ipc`, 
         `privileged`, `volumes`, `cgroup_parent`, `environment` and 
         `cap_add`. The semantics of these variables is the same as 
-        specified by the [docker compose]() YAML spec.
+        specified by the [docker 
+        compose](https://docs.docker.com/compose/compose-file/) YAML 
+        spec.
       * Compose. If using docker compose a `compose` variable is 
-        expected, containing a compose-compatible specification. Note 
+        expected, containing an specification in [compose YAML 
+        format](https://docs.docker.com/compose/compose-file/). Note 
         that compose itself its executed in a docker container (i.e. 
         is not installed on the host).
       * Script. If a custom script is used, the `script` variable is 

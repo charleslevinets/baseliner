@@ -27,6 +27,7 @@
 - name: stop any running container
   shell: "docker stop `docker ps -q`"
   ignore_errors: true
+  when: (stop_all | bool) | default(true)
 
 - name: remove containers to avoid name clashes
   shell: "docker rm `docker ps -qa`"

@@ -11,6 +11,10 @@
   - image_exists.rc == 1
   - not {{ ignore_pull_error_if_image_exists | default(false) }}
 
+- name: define name of container
+  set_fact:
+    container_name: 'baseliner_{{ inventory_hostname_short }}'
+
 - name: initialize docker_flags variable
   set_fact:
     docker_flags: ''
@@ -98,73 +102,56 @@
   when: bench.cgroup_parent is defined
 
 - debug:
-    msg: 'Running docker command: docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
+    msg: 'docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
 
 - name: run container
-  shell: docker run --name baseliner --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
+  shell: docker run --rm --name {{ container_name }} {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}
   environment: '{{ bench_params }}'
-  async: '{{ bench.test_timeout | default(test_timeout | default(10800)) }}'
-  poll: 60
-  register: docker_run_async_result
-  ignore_errors: true
+  async: 1000000
+  poll: 0
+  register: docker_async_run
 
-- name: get status of async task
+- name: wait for containers in parallel mode
+  local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c 1 -t {{ bench.test_timeout | default(test_timeout | default(10800)) }}
+  when: baseliner_execution_mode | default("single-node") == "parallel"
+  register: wait_for_result_parallel
+  run_once: true
+
+- name: wait for containers in single-node mode
+  local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c {{ groups.all | length }} -t {{ bench.test_timeout | default(test_timeout | default(10800)) }}
+  when: baseliner_execution_mode | default("single-node") == "single-node"
+  register: wait_for_result_singlenode
+  run_once: true
+
+- local_action:
+    module: debug
+    msg: 'WAIT_FOR_RESULT: {{ wait_for_result_parallel.stdout_lines | default("") }} {{ wait_for_result_singlenode.stdout_lines | default("") }}'
+  run_once: true
+
+- name: get result of container execution
   async_status:
-    jid: '{{ docker_run_async_result.ansible_job_id }}'
-  register: docker_run_result
-  when:
-  - docker_run_async_result is defined
-  - docker_run_async_result.ansible_job_id is defined
+    jid: '{{ docker_async_run.ansible_job_id }}'
+  register: docker_run
   ignore_errors: true
-
-- name: stop running container if timedout
-  shell: 'docker stop baseliner || docker rm -f baseliner'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - not docker_run_result.finished
-  ignore_errors: true
-
-- debug:
-    msg: 'WARNING: test timed out and we killed it.'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - not docker_run_result.finished
-- debug:
-    msg: 'WARNING: test terminated with non-zero exit code.'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - docker_run_result.finished
-  - docker_run_result.rc != 0
 
 - name: record elapsed time in output folder
   local_action:
     module: copy
-    content: '{{ docker_run_result.delta }}'
+    content: '{{ docker_run.delta }}'
     dest: '{{ output_folder }}/runtime'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - docker_run_result.finished
 
 - name: capture stdout
   local_action:
     module: copy
-    content: '{{ docker_run_result.stdout }}'
+    content: '{{ docker_run.stdout }}'
     dest: '{{ output_folder }}/std.out'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - docker_run_result.finished
 
 - name: capture stderr
   local_action:
     module: copy
-    content: '{{ docker_run_result.stderr }}'
+    content: '{{ docker_run.stderr }}'
     dest: '{{ output_folder }}/std.err'
-  when:
-  - docker_run_result is defined
-  - docker_run_result.finished is defined
-  - docker_run_result.finished
+
+- debug:
+    msg: 'WARNING: container terminated with non-zero exit code.'
+  when: docker_run.rc != 0

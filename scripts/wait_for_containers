@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -e
+
+inventory_file="./hosts"
+min_num_hosts_to_wait=1
+timeout=10800
+delay=30
+
+while getopts ":i:c:t:h" o; do
+  case "${o}" in
+    i)
+      inventory_file="${OPTARG}"
+      ;;
+    c)
+      min_num_hosts_to_wait="${OPTARG}"
+      ;;
+    t)
+      timeout="${OPTARG}"
+      ;;
+    h)
+      print_usage 0
+      ;;
+    *)
+      print_usage 1
+      ;;
+  esac
+done
+
+if [ -z "$timeout" ]; then
+  echo "Expecting -t flag with timeout"
+  exit 1
+fi
+if [ -z "$inventory_file" ]; then
+  echo "Expecting -i flag with path to inventory file"
+  exit 1
+fi
+if [ -z "$min_num_hosts_to_wait" ]; then
+  echo "Expecting -c flag with minimum number of hosts to wait"
+  exit 1
+fi
+
+shell_cmd=
+cat >tmp_playbook.yml <<EOL
+- hosts: all
+  gather_facts: false
+  tasks:
+  - name: get list of running containers
+    command: docker ps -q --filter name=baseliner_{{ inventory_hostname_short }}
+    register: ps_result
+  - debug:
+      msg: '{{ ps_result }}'
+  - name: print message if no containers are running
+    debug:
+      msg: "INFO: no containers running"
+    when: (ps_result.stdout_lines | length) == 0
+EOL
+
+ANSIBLE_LOG_PATH=/dev/null
+start_time=`date +%s`
+timeout_time=$((start_time + timeout))
+while :; do
+  ansible_output=`ansible-playbook -i "${inventory_file}" ./tmp_playbook.yml`
+  hosts_finished=`echo $ansible_output | grep 'INFO: no containers' | wc -l`
+  if [ $hosts_finished -ge $min_num_hosts_to_wait ] ; then
+    echo "$hosts_finished hosts finished running their containers"
+    break
+  fi
+  curr_time=`date +%s`
+  if [ $curr_time -ge $timeout_time ]; then
+    echo "WARNING: timeout waiting for $min_num_hosts_to_wait hosts"
+    break
+  fi
+  sleep $delay
+done
+
+ansible all -i "${inventory_file}" -m shell -a "docker stop baseliner_{{ inventory_hostname_short }} || true" &> /dev/null
+ansible all -i "${inventory_file}" -m shell -a "docker rm -f baseliner_{{ inventory_hostname_short }} || true" &> /dev/null
+
+rm -f tmp_playbook.yml

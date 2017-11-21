@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
-set -ex
 
 print_usage() {
-  echo "Usage: baseliner -i <inventory> [-o dir] [-f <conf>] [-a extra-args]"
+  echo "Usage: baseliner [-i inventory] [-o dir] [-f <conf>] [-m mode]"
   echo ""
   echo "Flags:"
   echo "  -i <inventory> inventory file passed to ansible (default: ./hosts)."
   echo "  -f <conf>      baseliner configuration file (default: ./config.yml)."
-  echo "  -a <extra-arg> extra arguments for 'ansible-playbook' (default: '')."
   echo "  -o <out-dir>   output directory (default: ./results)."
+  echo "  -m <mode>      one of 'single-node' or 'parallel' (default: single-node)."
   exit $1
 }
 
-extra_args=""
 config_file="./config.yml"
 inventory="./hosts"
 results_dir="./results"
+any_error_fatal="false"
+stop_all="true"
+mode="single-node"
 
-while getopts ":f:a:o:i:h" o; do
+while getopts ":f:a:o:i:m:sh" o; do
   case "${o}" in
-    a)
-      extra_args="${OPTARG}"
-      ;;
     f)
       config_file="${OPTARG}"
       ;;
@@ -30,6 +28,15 @@ while getopts ":f:a:o:i:h" o; do
       ;;
     o)
       results_dir="${OPTARG}"
+      ;;
+    m)
+      mode="${OPTARG}"
+      ;;
+    e)
+      any_error_fatal="true"
+      ;;
+    s)
+      stop_all="false"
       ;;
     h)
       print_usage 0
@@ -52,7 +59,7 @@ if [ -n "${ANSIBLE_ROLES_PATH}" ]; then
   echo "roles_path = ${ANSIBLE_ROLES_PATH}" >> ansible.cfg
 fi
 
-export ANSIBLE_LOG_PATH="$results_dir/baseliner.log"
+export ANSIBLE_LOG_PATH="${results_dir}/baseliner.log"
 
 cat >playbook.yml <<EOL
 - hosts: all
@@ -60,14 +67,17 @@ cat >playbook.yml <<EOL
   - baseliner
 EOL
 
-echo '' > baseliner.log
+mkdir -p "${results_dir}"
+
+echo '' > "$ANSIBLE_LOG_PATH"
 
 ansible-playbook \
   -i "${inventory}" \
   -e @"${config_file}" \
-  -e local_results_path="$results_dir" \
+  -e local_results_path="${results_dir}" \
   -e remote_results_path="/tmp/results" \
-  ${extra_args} \
+  -e baseliner_execution_mode=$mode \
+  -e stop_all="${stop_all}" \
   ./playbook.yml
 
 rm -f ansible.cfg playbook.yml
