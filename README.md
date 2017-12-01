@@ -1,4 +1,4 @@
-<img src="docs/baseliner.png" width="200px">
+<img src="docs/baseliner.png" width="500px">
 
 Obtain performance baselines on a cluster of machines. Only SSH and 
 Python is required on the hosts (baseliner is implemented using 
@@ -54,7 +54,7 @@ baseliner -f /path/to/configuration.yml -i /path/to/machines_file
 ```
 
 Results are placed in a `results` folder. More examples are available 
-in the `examples/` folder.
+in the [`examples/`](examples/) folder.
 
 ## Configuration File Syntax
 
