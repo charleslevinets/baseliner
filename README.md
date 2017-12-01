@@ -1,4 +1,8 @@
-<img src="docs/baseliner.png" width="500px">
+<img src="docs/baseliner.png" width="400px">
+
+----------
+
+[![Build Status](https://travis-ci.org/ivotron/baseliner.svg?branch=master)](https://travis-ci.org/ivotron/baseliner)
 
 Obtain performance baselines on a cluster of machines. Only SSH and 
 Python is required on the hosts (baseliner is implemented using 
@@ -120,4 +124,4 @@ Docker's hub](https://hub.docker.com/r/ivotron/baseliner/).
 
 ### PIP
 
-Coming soon (#32)
+Coming soon ([#32](https://github.com/ivotron/baseliner/issues/32))
