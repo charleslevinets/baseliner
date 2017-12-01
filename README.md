@@ -1,10 +1,64 @@
-# baseliner
+<img src="docs/baseliner.png" width="200px">
 
-Ansible role to obtain performance baselines on remote machines.
+Obtain performance baselines on a cluster of machines. Only SSH and 
+Python is required on the hosts (baseliner is implemented using 
+[Ansible](https://ansible.com)). A slideshow with an overview can be found [here](https://docs.google.com/presentation/d/1zajJraXS_oQp1W1rbOe3TU07lcjCQRGKGQWGpL_boJs).
 
-## Variables
+## Usage
 
-This role expects certain variables to be defined:
+```
+Usage: baseliner [-i inventory] [-o dir] [-f <conf>] [-m mode] [-e]
+
+Flags:
+  -i <inventory> inventory file passed to ansible (default: ./hosts).
+  -f <conf>      baseliner configuration file (default: ./config.yml).
+  -o <out-dir>   output directory (default: ./results).
+  -m <mode>      one of 'single-node' or 'parallel' (default: single-node).
+  -e             terminate execution on first failure (default: false).
+```
+
+## Example
+
+ 1. Write a configuration (YAML) file containing the variables 
+    described above in a `config.yml` file:
+
+    ```
+    repetitions: 1
+    remote_results_path: "/tmp/results"
+    enable_monitoring: true
+    leave_monitor_running: false
+    test_timeout: 2400
+
+    benchmarks:
+    - name: zlog
+      image: ivotron/zlog-kv:79782a3
+      command: 100000
+      cgroup_parent: /
+    ```
+
+ 2. Write a `hosts` file containing the list of hosts. For example:
+
+    ```
+    node1.example.domain.org
+    node2.example.domain.org
+    node3.example.domain.org
+    ```
+
+
+Then, in the folder where these two files are located, invoke the 
+`baseliner` command. Alternatively, use `-f` and `-i` flags to specify 
+different file names and locations:
+
+```bash
+baseliner -f /path/to/configuration.yml -i /path/to/machines_file
+```
+
+Results are placed in a `results` folder. More examples are available 
+in the `examples/` folder.
+
+## Configuration File Syntax
+
+Baseliner expects certain variables to be defined in a `config.yml` file:
 
   * `benchmarks`. A list of benchmarks to execute (one benchmark per 
     item). At least one element must be defined. For each, the 
@@ -57,40 +111,13 @@ This role expects certain variables to be defined:
   * `test_timeout`. Timeout for tests in seconds (default: 10800 
     seconds).
 
-## Examples
+## Installation
 
-More examples are available in the `examples/` folder.
-
-## CLI command
-
-A wrapper for making use of the role. First, write a configuration 
-(YAML) file containing the variables described above in a `config.yml` 
-file:
-
-```
-repetitions: 1
-remote_results_path: "/tmp/results"
-enable_monitoring: true
-leave_monitor_running: false
-test_timeout: 2400
-
-benchmarks:
-- name: zlog
-  image: ivotron/zlog-kv:79782a3
-  command: 100000
-  cgroup_parent: /
-```
-
-Then write a `hosts` file containing the inventory. And then:
-
-```bash
-cd baseliner/
-bin/baseliner
-```
-
-### In Docker
+### Docker
 
 The role is conveniently packaged in a docker image, [available from 
-Docker's hub](https://hub.docker.com/r/ivotron/baseliner/). We 
-currently only keep the latest version available.
+Docker's hub](https://hub.docker.com/r/ivotron/baseliner/).
 
+### PIP
+
+Coming soon (#32)
