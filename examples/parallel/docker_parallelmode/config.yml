@@ -1,0 +1,14 @@
+# parallel execution mode example.
+#
+# when a container finishes earlier than others,
+# baseliner stops them all
+
+benchmarks:
+- name: exit-13-example
+  image: debian:stretch-slim
+  command: bash -c '$COMMAND'
+  environment:
+    COMMAND: "sleep 120"
+  environment_host: # overrides 'environment' above for node1
+    node1:
+      COMMAND: "sleep 5"

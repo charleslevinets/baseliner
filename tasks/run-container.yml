@@ -155,3 +155,21 @@
 - debug:
     msg: 'WARNING: container terminated with non-zero exit code.'
   when: docker_run.rc != 0
+
+- name: failfast for single-node mode
+  fail:
+    msg: 'benchmark failed'
+  when:
+  - (baseliner_execution_mode | default("single-node")) == "single-node"
+  - failfast | default(false)
+  - docker_run.rc != 0
+
+- name: failfast for parallel mode
+  local_action:
+    module: fail
+    msg: 'benchmark failed'
+  when:
+  - (baseliner_execution_mode | default("single-node")) == "parallel"
+  - failfast | default(false)
+  - ("hosts finished running" not in wait_for_result_parallel.stdout or "timeout waiting" in wait_for_result_parallel.stdout)
+  run_once: true

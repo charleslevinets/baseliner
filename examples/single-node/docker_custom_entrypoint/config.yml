@@ -1,0 +1,5 @@
+benchmarks:
+- name: custom-entrypoint
+  image: debian:jessie
+  entrypoint: ls
+  command: -l

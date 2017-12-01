@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 print_usage() {
-  echo "Usage: baseliner [-i inventory] [-o dir] [-f <conf>] [-m mode]"
+  echo "Usage: baseliner [-i inventory] [-o dir] [-f <conf>] [-m mode] [-e]"
   echo ""
   echo "Flags:"
   echo "  -i <inventory> inventory file passed to ansible (default: ./hosts)."
   echo "  -f <conf>      baseliner configuration file (default: ./config.yml)."
   echo "  -o <out-dir>   output directory (default: ./results)."
   echo "  -m <mode>      one of 'single-node' or 'parallel' (default: single-node)."
+  echo "  -e             terminate execution on first failure (default: false)."
   exit $1
 }
 
@@ -17,8 +18,9 @@ results_dir="./results"
 any_error_fatal="false"
 stop_all="true"
 mode="single-node"
+failfast="false"
 
-while getopts ":f:a:o:i:m:sh" o; do
+while getopts ":f:a:o:i:m:esh" o; do
   case "${o}" in
     f)
       config_file="${OPTARG}"
@@ -37,6 +39,9 @@ while getopts ":f:a:o:i:m:sh" o; do
       ;;
     s)
       stop_all="false"
+      ;;
+    e)
+      failfast="true"
       ;;
     h)
       print_usage 0
@@ -78,6 +83,11 @@ ansible-playbook \
   -e remote_results_path="/tmp/results" \
   -e baseliner_execution_mode=$mode \
   -e stop_all="${stop_all}" \
+  -e failfast="${failfast}" \
   ./playbook.yml
 
+ansible_result=$?
+
 rm -f ansible.cfg playbook.yml
+
+exit $ansible_result

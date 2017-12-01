@@ -1,0 +1,7 @@
+benchmarks:
+- name: custom-entrypoint
+  image: debian:jessie
+  entrypoint: ls
+  command: -l $FOLDER
+  parameters:
+    FOLDER: [ '/tmp/', '/usr', '/etc' ]

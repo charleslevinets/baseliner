@@ -1,0 +1,7 @@
+language: bash
+services: docker
+install:
+- curl -O https://raw.githubusercontent.com/ivotron/docker-openssh/master/insecure_rsa
+- chmod 600 insecure_rsa
+- mv insecure_rsa ci/
+script: ci/run_examples.sh
