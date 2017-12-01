@@ -36,7 +36,13 @@ function run_examples_for_mode {
     echo "###########################"
     echo ""
 
-    baseliner -e -s -i $hostsfile -m $1
+    docker run --rm --name=bliner \
+      -v `pwd`:/bliner \
+      -v $hostsfile:/hosts \
+      -v $sshkey:/root/.ssh/id_rsa \
+      --workdir=/bliner \
+      --net=host \
+      ivotron/baseliner:2.4.1.0 -e -s -i /hosts -m $1
 
     popd
   done
