@@ -2,9 +2,7 @@
 set -e
 
 inventory_file="./hosts"
-min_num_hosts_to_wait=1
-timeout=10800
-delay=30
+delay=300
 
 while getopts ":i:c:t:h" o; do
   case "${o}" in
@@ -30,16 +28,19 @@ if [ -z "$timeout" ]; then
   echo "Expecting -t flag with timeout"
   exit 1
 fi
-if [ -z "$inventory_file" ]; then
-  echo "Expecting -i flag with path to inventory file"
-  exit 1
-fi
 if [ -z "$min_num_hosts_to_wait" ]; then
   echo "Expecting -c flag with minimum number of hosts to wait"
   exit 1
 fi
 
-shell_cmd=
+if [ $timeout -lt $delay ]; then
+  $delay=60
+fi
+
+if [ $timeout -ge 7200 ]; then
+  delay=600
+fi
+
 cat >tmp_playbook.yml <<EOL
 - hosts: all
   gather_facts: false
@@ -55,25 +56,43 @@ cat >tmp_playbook.yml <<EOL
     when: (ps_result.stdout_lines | length) == 0
 EOL
 
-ANSIBLE_LOG_PATH=/dev/null
-start_time=`date +%s`
+ANSIBLE_LOG_PATH="${PWD}/wait_for_containers.log"
+
+start_time=$(date +%s)
 timeout_time=$((start_time + timeout))
+
 while :; do
-  ansible_output=`ansible-playbook -i "${inventory_file}" ./tmp_playbook.yml`
-  hosts_finished=`echo $ansible_output | grep 'INFO: no containers' | wc -l`
-  if [ $hosts_finished -ge $min_num_hosts_to_wait ] ; then
-    echo "$hosts_finished hosts finished running their containers"
-    break
-  fi
-  curr_time=`date +%s`
+
+  sleep $delay
+
+  curr_time=$(date +%s)
   if [ $curr_time -ge $timeout_time ]; then
     echo "WARNING: timeout waiting for $min_num_hosts_to_wait hosts"
     break
   fi
-  sleep $delay
+
+  echo '' > "${ANSIBLE_LOG_PATH}"
+
+  set +e
+  ansible-playbook -i "${inventory_file}" ./tmp_playbook.yml &> /dev/null
+  ansible_result=$?
+  set -e
+
+  if [ $ansible_result -ne 0 ]; then
+    continue
+  fi
+
+  num_hosts_finished=$(cat "${ANSIBLE_LOG_PATH}" | grep 'INFO: no containers' | wc -l)
+
+  if [ $num_hosts_finished -ge $min_num_hosts_to_wait ] ; then
+    echo "$num_hosts_finished hosts finished running their containers"
+    break
+  fi
+
 done
 
-ansible all -i "${inventory_file}" -m shell -a "docker stop baseliner_{{ inventory_hostname_short }} || true" &> /dev/null
-ansible all -i "${inventory_file}" -m shell -a "docker rm -f baseliner_{{ inventory_hostname_short }} || true" &> /dev/null
+set +e
+ansible all -i "${inventory_file}" -m shell -a "docker stop baseliner_{{ inventory_hostname_short }}" &> /dev/null
+ansible all -i "${inventory_file}" -m shell -a "docker rm -f baseliner_{{ inventory_hostname_short }}" &> /dev/null
 
-rm -f tmp_playbook.yml
+rm -f $ANSIBLE_LOG_PATH tmp_playbook.yml

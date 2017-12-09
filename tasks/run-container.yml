@@ -118,7 +118,7 @@
   run_once: true
 
 - name: wait for containers in single-node mode
-  local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c {{ groups.all | length }} -t {{ bench.test_timeout | default(test_timeout | default(10800)) }}
+  local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c {{ ansible_play_hosts | length }} -t {{ bench.test_timeout | default(test_timeout | default(10800)) }}
   when: baseliner_execution_mode | default("single-node") == "single-node"
   register: wait_for_result_singlenode
   run_once: true

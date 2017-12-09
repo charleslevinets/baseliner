@@ -42,7 +42,7 @@ function run_examples_for_mode {
       -v $sshkey:/root/.ssh/id_rsa \
       --workdir=/bliner \
       --net=host \
-      ivotron/baseliner:2.4.1.0 -e -s -i /hosts -m $1
+      baseliner -e -s -i /hosts -m $1
 
     popd
   done
@@ -53,11 +53,11 @@ sshkey=`pwd`/ci/insecure_rsa
 
 # single-node
 launch_node 1
+launch_node 2
 write_hosts_file 1
 run_examples_for_mode single-node
 
 # parallel
-launch_node 2
 launch_node 3
 write_hosts_file 3
 run_examples_for_mode parallel
