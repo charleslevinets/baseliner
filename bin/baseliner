@@ -19,8 +19,9 @@ any_error_fatal="false"
 stop_all="true"
 mode="single-node"
 failfast="false"
+delay=300
 
-while getopts ":f:a:o:i:m:esh" o; do
+while getopts ":f:a:o:i:m:d:esh" o; do
   case "${o}" in
     f)
       config_file="${OPTARG}"
@@ -34,14 +35,14 @@ while getopts ":f:a:o:i:m:esh" o; do
     m)
       mode="${OPTARG}"
       ;;
-    e)
-      any_error_fatal="true"
-      ;;
-    s)
-      stop_all="false"
+    d)
+      delay="${OPTARG}"
       ;;
     e)
       failfast="true"
+      ;;
+    s)
+      stop_all="false"
       ;;
     h)
       print_usage 0
@@ -55,8 +56,9 @@ done
 cat >ansible.cfg <<EOL
 [defaults]
 timeout = 120
-retry_files_enabled = False
-host_key_checking = False
+display_skipped_hosts = false
+retry_files_enabled = false
+host_key_checking = false
 callback_whitelist = profile_tasks, timer
 EOL
 
@@ -84,6 +86,7 @@ ansible-playbook \
   -e baseliner_execution_mode=$mode \
   -e stop_all="${stop_all}" \
   -e failfast="${failfast}" \
+  -e test_wait_delay="${delay}" \
   ./playbook.yml
 
 ansible_result=$?

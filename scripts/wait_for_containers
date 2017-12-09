@@ -2,9 +2,8 @@
 set -e
 
 inventory_file="./hosts"
-delay=300
 
-while getopts ":i:c:t:h" o; do
+while getopts ":i:c:t:d:h" o; do
   case "${o}" in
     i)
       inventory_file="${OPTARG}"
@@ -15,17 +14,18 @@ while getopts ":i:c:t:h" o; do
     t)
       timeout="${OPTARG}"
       ;;
-    h)
-      print_usage 0
-      ;;
-    *)
-      print_usage 1
+    d)
+      delay="${OPTARG}"
       ;;
   esac
 done
 
 if [ -z "$timeout" ]; then
   echo "Expecting -t flag with timeout"
+  exit 1
+fi
+if [ -z "$delay" ]; then
+  echo "Expecting -d flag with test wait retry delay"
   exit 1
 fi
 if [ -z "$min_num_hosts_to_wait" ]; then

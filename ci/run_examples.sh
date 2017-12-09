@@ -42,19 +42,24 @@ function run_examples_for_mode {
       -v $sshkey:/root/.ssh/id_rsa \
       --workdir=/bliner \
       --net=host \
-      baseliner -e -s -i /hosts -m $1
+      baseliner -e -s -i /hosts -m $1 -d 60
 
     popd
   done
 }
 
-hostsfile=`pwd`/hosts
+docker build -t baseliner .
+curl -O https://raw.githubusercontent.com/ivotron/docker-openssh/master/insecure_rsa
+chmod 600 insecure_rsa
+mv insecure_rsa ci/
+
 sshkey=`pwd`/ci/insecure_rsa
+hostsfile=`pwd`/hosts
 
 # single-node
 launch_node 1
 launch_node 2
-write_hosts_file 1
+write_hosts_file 2
 run_examples_for_mode single-node
 
 # parallel
