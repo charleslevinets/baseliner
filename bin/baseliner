@@ -55,7 +55,7 @@ done
 
 cat >ansible.cfg <<EOL
 [defaults]
-timeout = 120
+timeout = 1200
 display_skipped_hosts = false
 retry_files_enabled = false
 host_key_checking = false
