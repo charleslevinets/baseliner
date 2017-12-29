@@ -8,6 +8,7 @@ function launch_node {
     -p 222$1:22 \
     -e ADD_INSECURE_KEY=true \
     -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp:/tmp \
     ivotron/python-sshd:debian-9
 }
 
@@ -18,34 +19,21 @@ function write_hosts_file {
   done
 }
 
-function run_examples_for_mode {
-  for e in examples/$1/* ; do
+function run_test {
+  mode=$1
+  t=$2
 
-    if [ ! -f $e/config.yml ]; then
-      continue
-    fi
-    if [[ $e == *"compose_"* ]]; then
-      # skip compose examples since they don't work with docker-in-docker yet
-      continue
-    fi
+  pushd examples/$mode/$t
 
-    pushd $e
+  docker run --rm --name=bliner \
+    -v `pwd`:/bliner \
+    -v $hostsfile:/hosts \
+    -v $sshkey:/root/.ssh/id_rsa \
+    --workdir=/bliner \
+    --net=host \
+    baseliner -e -s -i /hosts -m $mode -d 60
 
-    echo "###########################"
-    echo " Running $1/`basename $e`"
-    echo "###########################"
-    echo ""
-
-    docker run --rm --name=bliner \
-      -v `pwd`:/bliner \
-      -v $hostsfile:/hosts \
-      -v $sshkey:/root/.ssh/id_rsa \
-      --workdir=/bliner \
-      --net=host \
-      baseliner -e -s -i /hosts -m $1 -d 60
-
-    popd
-  done
+  popd
 }
 
 docker build -t baseliner .
@@ -56,13 +44,16 @@ mv insecure_rsa ci/
 sshkey=`pwd`/ci/insecure_rsa
 hostsfile=`pwd`/hosts
 
-# single-node
+# single-node 1 node
 launch_node 1
-launch_node 2
-write_hosts_file 2
-run_examples_for_mode single-node
+write_hosts_file 1
+run_test single-node docker_fetch_output compose_redis
 
-# parallel
+# single-node and parallel modes with 3 nodes
+launch_node 2
 launch_node 3
 write_hosts_file 3
-run_examples_for_mode parallel
+run_test single-node docker_fetch_output
+run_test single-node docker_parameter_sweep
+run_test single-node docker_custom_entrypoint
+run_test parallel docker_parallelmode

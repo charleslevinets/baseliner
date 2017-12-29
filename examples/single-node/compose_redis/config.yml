@@ -14,5 +14,3 @@ benchmarks:
           redis-benchmark -d 8 -r 1000000 -n 20000000 -t get,set,lpush,lpop -P 4 --csv > /results/out.csv"
         volumes:
         - '/tmp/results:/results'
-  fetch:
-  - '/tmp/results'

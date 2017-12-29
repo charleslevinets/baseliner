@@ -3,7 +3,10 @@
     that:
     - 'benchmarks is defined'
     - 'local_results_path is defined'
-    - 'remote_results_path is defined'
+
+- name: set remote results path if not defined
+  set_fact:
+    remote_results_path: '/tmp/baseliner_output_{{ inventory_hostname_short }}'
 
 - name: ensure docker-engine is installed
   apt:

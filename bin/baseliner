@@ -82,7 +82,6 @@ ansible-playbook \
   -i "${inventory}" \
   -e @"${config_file}" \
   -e local_results_path="${results_dir}" \
-  -e remote_results_path="/tmp/results" \
   -e baseliner_execution_mode=$mode \
   -e stop_all="${stop_all}" \
   -e failfast="${failfast}" \

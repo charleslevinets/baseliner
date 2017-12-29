@@ -1,0 +1,4 @@
+benchmarks:
+- name: fetch-output
+  image: debian:jessie
+  command: touch /results/output_file

@@ -5,7 +5,7 @@
     dest: '{{ output_folder }}/'
     mode: pull
     use_ssh_args: yes
-  with_items: '{{ bench.fetch | default([])}}'
+  with_items: '{{ [remote_results_path] + bench.fetch | default([])}}'
   become: true
 
 - name: delete remote folder after transfer

@@ -61,6 +61,10 @@
     docker_flags: '{{ docker_flags }} -v {{ item }}'
   with_items: '{{ bench.volumes | default([]) }}'
 
+- name: add default volumes to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} -v {{ remote_results_path }}:/results -v {{ remote_results_path }}:/results'
+
 - name: set entrypoint
   set_fact:
     docker_flags: '{{ docker_flags }} --entrypoint={{ bench.entrypoint }}'
