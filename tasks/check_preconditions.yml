@@ -8,6 +8,35 @@
   set_fact:
     remote_results_path: '/tmp/baseliner_output_{{ inventory_hostname_short }}'
 
+- name: ensure results folder exists
+  local_action:
+    module: file
+    path: '{{ local_results_path }}'
+    state: directory
+    mode: 0755
+  run_once: true
+
+- name: check that pre-tasks file exists
+  local_action:
+    module: stat
+    path: '{{ pre_tasks_file }}'
+  register: stat_result
+  failed_when:
+  - 'stat_result is not defined'
+  - 'not stat_result.exists'
+  when: 'pre_tasks_file is defined'
+  run_once: true
+
+- name: check that post-tasks file exists
+  local_action:
+    module: stat
+    path: '{{ post_tasks_file }}'
+  register: stat_result
+  failed_when:
+  - 'stat_result is not defined'
+  - 'not stat_result.exists'
+  when: 'post_tasks_file is defined'
+
 - name: ensure docker-engine is installed
   apt:
     name: docker-engine
@@ -35,11 +64,3 @@
 - name: remove containers to avoid name clashes
   shell: "docker rm `docker ps -qa`"
   ignore_errors: true
-
-- name: ensure results folder exists
-  local_action:
-    module: file
-    path: '{{ local_results_path }}'
-    state: directory
-    mode: 0755
-  run_once: true

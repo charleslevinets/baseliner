@@ -3,3 +3,4 @@ ansible.log
 .ropeproject
 test
 Dockerfile
+examples/*/*/results

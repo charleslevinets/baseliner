@@ -1,0 +1,8 @@
+- name: create folder
+  file:
+    path: /tmp/created_by_pre-tasks
+    state: directory
+- name: create a file
+  file:
+    path: /tmp/created_by_pre-tasks/a_file
+    state: touch

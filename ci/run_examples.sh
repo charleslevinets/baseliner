@@ -31,7 +31,7 @@ function run_test {
     -v $sshkey:/root/.ssh/id_rsa \
     --workdir=/bliner \
     --net=host \
-    baseliner -e -s -i /hosts -m $mode -d 60
+    baseliner -e -s -i /hosts -m $mode -d 60 $3
 
   popd
 }
@@ -48,12 +48,15 @@ hostsfile=`pwd`/hosts
 launch_node 1
 write_hosts_file 1
 run_test single-node docker_fetch_output compose_redis
+run_test single-node compose_redis
+run_test single-node docker_pre-tasks "-p /bliner/pre-tasks.yml"
 
 # single-node and parallel modes with 3 nodes
 launch_node 2
 launch_node 3
 write_hosts_file 3
+run_test single-node docker_custom_entrypoint
 run_test single-node docker_fetch_output
 run_test single-node docker_parameter_sweep
-run_test single-node docker_custom_entrypoint
+run_test single-node docker_pre-tasks
 run_test parallel docker_parallelmode

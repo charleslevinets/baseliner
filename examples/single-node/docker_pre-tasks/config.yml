@@ -1,0 +1,6 @@
+benchmarks:
+- name: pre-tasks
+  image: debian:jessie
+  command: ls -l /tmp/created_by_pre-tasks/
+  volumes:
+  - '/tmp:/tmp'

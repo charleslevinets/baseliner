@@ -9,6 +9,9 @@
   include_tasks: monitoring-start.yml
   when: enable_monitoring | default(false)
 
+- include_tasks: '{{ pre_tasks_file }}'
+  when: 'pre_tasks_file is defined'
+
 - name: get number of repetitions
   set_fact:
     num_repetitions: "{{ (num_repetitions | default([])) + [ item ] }}"
@@ -23,3 +26,6 @@
 - name: stop monitoring
   include_tasks: monitoring-stop.yml
   when: enable_monitoring | default(false)
+
+- include_tasks: '{{ post_tasks_file }}'
+  when: 'post_tasks_file is defined'
