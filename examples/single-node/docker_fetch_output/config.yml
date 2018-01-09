@@ -1,4 +1,7 @@
 benchmarks:
-- name: fetch-output
+- name: fetch-slash-results
   image: debian:jessie
   command: touch /results/output_file
+- name: fetch-slash-output
+  image: debian:jessie
+  command: touch /output/output_file

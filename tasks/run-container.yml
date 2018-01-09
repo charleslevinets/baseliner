@@ -63,7 +63,7 @@
 
 - name: add default volumes to docker_flags
   set_fact:
-    docker_flags: '{{ docker_flags }} -v {{ remote_results_path }}:/results -v {{ remote_results_path }}:/results'
+    docker_flags: '{{ docker_flags }} -v {{ remote_results_path }}:/results -v {{ remote_results_path }}:/output'
 
 - name: set entrypoint
   set_fact:
