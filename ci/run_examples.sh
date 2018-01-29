@@ -47,9 +47,12 @@ hostsfile=`pwd`/hosts
 # single-node 1 node
 launch_node 1
 write_hosts_file 1
-run_test single-node docker_fetch_output compose_redis
+run_test single-node docker_fetch_output
 run_test single-node compose_redis
 run_test single-node docker_pre-tasks "-p /bliner/pre-tasks.yml"
+
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node1/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node1/repetition/1/output_file
 
 # single-node and parallel modes with 3 nodes
 launch_node 2
@@ -60,3 +63,10 @@ run_test single-node docker_fetch_output
 run_test single-node docker_parameter_sweep
 run_test single-node docker_pre-tasks
 run_test parallel docker_parallelmode
+
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node1/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node1/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node2/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node2/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node3/repetition/1/output_file
+test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node3/repetition/1/output_file

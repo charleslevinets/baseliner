@@ -12,6 +12,6 @@
   file:
     path: '{{ item }}/'
     state: absent
-  with_items: '{{ bench.fetch | default([])}}'
+  with_items: '{{ [remote_results_path] + bench.fetch | default([])}}'
   when: remove_benchmark_output | default(true)
   become: true

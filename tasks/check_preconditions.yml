@@ -7,6 +7,7 @@
 - name: set remote results path if not defined
   set_fact:
     remote_results_path: '/tmp/baseliner_output_{{ inventory_hostname_short }}'
+  when: remote_results_path is not defined
 
 - name: ensure results folder exists
   local_action:

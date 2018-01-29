@@ -57,4 +57,3 @@
 
 - name: download results
   include_tasks: download-output.yml
-  when: bench.fetch is defined
