@@ -47,22 +47,28 @@ hostsfile=`pwd`/hosts
 # single-node 1 node
 launch_node 1
 write_hosts_file 1
-run_test single-node docker_fetch_output
 run_test single-node compose_redis
 run_test single-node docker_pre-tasks "-p /bliner/pre-tasks.yml"
+run_test single-node docker_fetch_output
 
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node1/repetition/1/output_file
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node1/repetition/1/output_file
+
+set +e
+run_test single-node docker_timeout
+test $? -ne 0
+cat examples/single-node/docker_timeout/results/baseliner.log | grep 'timeout waiting for'
+set -e
 
 # single-node and parallel modes with 3 nodes
 launch_node 2
 launch_node 3
 write_hosts_file 3
 run_test single-node docker_custom_entrypoint
-run_test single-node docker_fetch_output
 run_test single-node docker_parameter_sweep
 run_test single-node docker_pre-tasks
 run_test parallel docker_parallelmode
+run_test single-node docker_fetch_output
 
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node1/repetition/1/output_file
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node1/repetition/1/output_file
@@ -70,3 +76,8 @@ test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-o
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node2/repetition/1/output_file
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-output/machine/node3/repetition/1/output_file
 test -f examples/single-node/docker_fetch_output/results/benchmark/fetch-slash-results/machine/node3/repetition/1/output_file
+
+set +e
+run_test single-node docker_timeout
+test $? -ne 0
+cat examples/single-node/docker_timeout/results/baseliner.log | grep 'timeout waiting for'

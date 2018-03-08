@@ -1,0 +1,5 @@
+benchmarks:
+- name: test-timeout
+  image: debian:jessie
+  test_timeout: 120
+  command: sleep 360

@@ -115,21 +115,26 @@
   poll: 0
   register: docker_async_run
 
-- name: wait for containers in parallel mode
+- name: wait for containers in parallel mode and stop/kill them if they timeout
   local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c 1 -t {{ bench.test_timeout | default(test_timeout | default(6000)) }} -d {{ test_wait_delay | default(300) }}
   when: baseliner_execution_mode | default("single-node") == "parallel"
   register: wait_for_result_parallel
   run_once: true
 
-- name: wait for containers in single-node mode
+- name: wait for containers in single-node mode and stop/kill them if they timeout
   local_action: command {{ role_path }}/scripts/wait_for_containers -i {{ inventory_file }} -c {{ ansible_play_hosts | length }} -t {{ bench.test_timeout | default(test_timeout | default(6000)) }} -d {{ test_wait_delay | default(300) }}
   when: baseliner_execution_mode | default("single-node") == "single-node"
   register: wait_for_result_singlenode
   run_once: true
 
+- name: get wait result
+  local_action:
+    set_fact wait_result='{{ (wait_for_result_parallel.stdout | default("")) + " " + (wait_for_result_singlenode.stdout | default("")) }}'
+  run_once: true
+
 - local_action:
     module: debug
-    msg: 'WAIT_FOR_RESULT: {{ wait_for_result_parallel.stdout_lines | default("") }} {{ wait_for_result_singlenode.stdout_lines | default("") }}'
+    msg: 'WAIT_FOR_RESULT: {{ wait_result }}'
   run_once: true
 
 - name: get result of container execution
@@ -158,7 +163,10 @@
 
 - debug:
     msg: 'WARNING: container terminated with non-zero exit code.'
-  when: docker_run.rc != 0
+  when:
+  - '"timeout waiting for" not in wait_result'
+  - docker_run.rc != 0
+  - baseliner_execution_mode | default("single-node") == "single-node"
 
 - name: failfast for single-node mode
   fail:
@@ -175,5 +183,5 @@
   when:
   - (baseliner_execution_mode | default("single-node")) == "parallel"
   - failfast | default(false)
-  - ("hosts finished running" not in wait_for_result_parallel.stdout or "timeout waiting" in wait_for_result_parallel.stdout)
+  - '"hosts finished running" not in wait_result'
   run_once: true

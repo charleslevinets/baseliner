@@ -20,7 +20,7 @@ any_error_fatal="false"
 stop_all="true"
 mode="single-node"
 failfast="false"
-delay=300
+delay=60
 pre_tasks_file=""
 
 while getopts ":f:a:o:i:m:d:p:esh" o; do
