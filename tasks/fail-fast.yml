@@ -1,0 +1,20 @@
+- debug:
+    msg: "bench_result='{{ bench_run_result }}'"
+- name: failfast for single-node mode
+  fail:
+    msg: 'benchmark failed'
+  when:
+  - (baseliner_execution_mode | default("single-node")) == "single-node"
+  - failfast | default(false)
+  - bench_run_result != '0'
+  run_once: true
+
+- name: failfast for parallel mode
+  local_action:
+    module: fail
+    msg: 'benchmark failed'
+  when:
+  - (baseliner_execution_mode | default("single-node")) == "parallel"
+  - failfast | default(false)
+  - '"hosts finished running" not in wait_result'
+  run_once: true

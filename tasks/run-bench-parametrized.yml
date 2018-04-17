@@ -57,3 +57,6 @@
 
 - name: download results
   include_tasks: download-output.yml
+
+- name: check if we should fail fast
+  include_tasks: fail-fast.yml

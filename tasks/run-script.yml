@@ -5,23 +5,38 @@
     dest: '/tmp/{{ bench.script }}'
     mode: 0755
 
-- name: record time before execution
-  local_action: command date +%s
-  register: time_before
-  run_once: true
-  when: bench.measure_runtime | default(false)
+- name: run script
+  shell: '/tmp/{{ bench.script }}'
+  async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
+  poll: 20
+  register: script_async
 
-- name: time task
-  local_action: command date +%s
-  register: time_before
-  run_once: true
-  when: bench.measure_runtime | default(false)
+- name: get output
+  async_status:
+    jid: '{{ script_async.ansible_job_id }}'
+  register: script_result
 
-- name: record time after execution
-  local_action: command date +%s
-  register: time_after
+- name: set fact to store result of bench execution
+  local_action:
+    module: set_fact
+    bench_run_result: '{{ script_result.rc }}'
+    wait_result: 'hosts finished running'
   run_once: true
-  when: bench.measure_runtime | default(false) 
+
 - name: record elapsed time in output folder
-  local_action: shell echo "{{bench.name}},$(({{time_after.stdout}}-{{time_before.stdout}})) >> {{local_results_folder}}/runtime
-  when: bench.measure_runtime | default(false)
+  local_action:
+    module: copy
+    content: '{{ script_result.delta }}'
+    dest: '{{ output_folder }}/runtime'
+
+- name: capture stdout
+  local_action:
+    module: copy
+    content: '{{ script_result.stdout }}'
+    dest: '{{ output_folder }}/std.out'
+
+- name: capture stderr
+  local_action:
+    module: copy
+    content: '{{ script_result.stderr }}'
+    dest: '{{ output_folder }}/std.err'

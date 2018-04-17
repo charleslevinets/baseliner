@@ -129,7 +129,8 @@
 
 - name: get wait result
   local_action:
-    set_fact wait_result='{{ (wait_for_result_parallel.stdout | default("")) + " " + (wait_for_result_singlenode.stdout | default("")) }}'
+    module: set_fact
+    wait_result: '{{ (wait_for_result_parallel.stdout | default("")) + " " + (wait_for_result_singlenode.stdout | default("")) }}'
   run_once: true
 
 - local_action:
@@ -142,6 +143,12 @@
     jid: '{{ docker_async_run.ansible_job_id }}'
   register: docker_run
   ignore_errors: true
+
+- name: set fact to store result of bench execution
+  local_action:
+    module: set_fact
+    bench_run_result: '{{ docker_run.rc }}'
+  run_once: true
 
 - name: record elapsed time in output folder
   local_action:
@@ -167,21 +174,3 @@
   - '"timeout waiting for" not in wait_result'
   - docker_run.rc != 0
   - baseliner_execution_mode | default("single-node") == "single-node"
-
-- name: failfast for single-node mode
-  fail:
-    msg: 'benchmark failed'
-  when:
-  - (baseliner_execution_mode | default("single-node")) == "single-node"
-  - failfast | default(false)
-  - docker_run.rc != 0
-
-- name: failfast for parallel mode
-  local_action:
-    module: fail
-    msg: 'benchmark failed'
-  when:
-  - (baseliner_execution_mode | default("single-node")) == "parallel"
-  - failfast | default(false)
-  - '"hosts finished running" not in wait_result'
-  run_once: true

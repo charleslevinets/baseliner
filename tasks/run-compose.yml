@@ -23,7 +23,7 @@
       --volume /tmp/docker-compose.yml:/docker-compose.yml \
       docker/compose:1.11.1 up \
         --force-recreate --abort-on-container-exit
-  async: '{{ test_timeout | default(10800) }}'
+  async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
   poll: 20
   register: docker_compose_async
 
@@ -32,12 +32,18 @@
     jid: '{{ docker_compose_async.ansible_job_id }}'
   register: docker_compose_result
 
+- name: set fact to store result of bench execution
+  local_action:
+    module: set_fact
+    bench_run_result: '{{ docker_compose_result.rc }}'
+    wait_result: 'hosts finished running'
+  run_once: true
+
 - name: record elapsed time in output folder
   local_action:
     module: copy
     content: '{{ docker_compose_result.delta }}'
     dest: '{{ output_folder }}/runtime'
-  when: 'measure_runtime | default(true)'
 
 - name: capture stdout
   local_action:
