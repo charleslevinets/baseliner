@@ -1,5 +1,3 @@
-- debug:
-    msg: "bench_result='{{ bench_run_result }}'"
 - name: failfast for single-node mode
   fail:
     msg: 'benchmark failed'
