@@ -47,6 +47,7 @@ hostsfile=`pwd`/hosts
 # single-node 1 node
 launch_node 1
 write_hosts_file 1
+run_test single-node script_simple
 run_test single-node compose_redis
 run_test single-node docker_pre-tasks "-p /bliner/pre-tasks.yml"
 run_test single-node docker_fetch_output
@@ -64,6 +65,7 @@ set -e
 launch_node 2
 launch_node 3
 write_hosts_file 3
+run_test single-node script_simple
 run_test single-node docker_custom_entrypoint
 run_test single-node docker_parameter_sweep
 run_test single-node docker_pre-tasks
