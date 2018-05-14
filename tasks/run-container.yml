@@ -28,6 +28,14 @@
     docker_flags: '{{ docker_flags }} -e {{ item.key }}="{{ item.value }}"'
   with_dict: '{{ bench_params | default({}) }}'
 
+- name: check if we have host-specific ips
+  set_fact:
+    ip_host_map: '{{ bench.ip_host | default({}) }}'
+- name: add host-specific ips to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} --ip {{ ip_host_map[inventory_hostname] }}"'
+  when: inventory_hostname in ip_host_map
+
 - name: check if we have host-specific environment
   set_fact:
     env_host_map: '{{ bench.environment_host | default({}) }}'
