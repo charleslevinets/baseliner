@@ -14,7 +14,7 @@
     module: file
     path: '{{ local_results_path }}'
     state: directory
-    mode: 0755
+    mode: 0777
   run_once: true
 
 - name: check that pre-tasks file exists
