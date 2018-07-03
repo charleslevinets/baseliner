@@ -54,6 +54,11 @@
     docker_flags: '{{ docker_flags }} --net={{ bench.network_mode }}'
   when: bench.network_mode is defined
 
+- name: add user to docker_flags
+  set_fact:
+    docker_flags: '{{ docker_flags }} --user={{ bench.user }}'
+  when: bench.user is defined
+
 - name: add ipc mode to docker_flags
   set_fact:
     docker_flags: '{{ docker_flags }} --ipc={{ bench.ipc }}'
