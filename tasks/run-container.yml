@@ -119,6 +119,10 @@
   when: bench.cgroup_parent is defined
 
 - debug:
+    msg: 'Number of active hosts: {{ ansible_play_hosts | length }}'
+  run_once: true
+
+- debug:
     msg: 'docker run --rm {{ docker_flags }} {{ bench.image }} {{ bench.command | default("") }}'
 
 - name: run container

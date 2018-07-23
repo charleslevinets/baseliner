@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 inventory_file="./hosts"
 
@@ -73,14 +72,8 @@ while :; do
 
   echo '' > "${ANSIBLE_LOG_PATH}"
 
-  set +e
   ansible-playbook -i "${inventory_file}" ./tmp_playbook.yml &> /dev/null
   ansible_result=$?
-  set -e
-
-  if [ $ansible_result -ne 0 ]; then
-    continue
-  fi
 
   num_hosts_finished=$(cat "${ANSIBLE_LOG_PATH}" | grep 'INFO: no containers' | wc -l)
 
