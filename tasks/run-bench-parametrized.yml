@@ -53,7 +53,7 @@
 
 - name: run script benchmark
   include_tasks: run-script.yml
-  when: bench.script is defined
+  when: bench.script_file is defined
 
 - name: download results
   include_tasks: download-output.yml

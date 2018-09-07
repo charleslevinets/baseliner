@@ -1,12 +1,21 @@
 ---
+- debug:
+    msg: 'bench.script_src_dir: {{ bench.script_src_dir }}'
+
+- debug:
+    msg: 'bench.script_file: {{ bench.script_file }}'
+
+- debug:
+    msg: 'playbook_dir: {{ playbook_dir }}'
+
 - name: push script
   copy:
-    src: '{{ bench.script }}'
-    dest: '/tmp/{{ bench.script }}'
+    src: '{{ bench.script_src_dir }}/{{ bench.script_file }}'
+    dest: '/tmp/{{ bench.script_file }}'
     mode: 0755
 
 - name: run script
-  shell: '/tmp/{{ bench.script }}'
+  shell: '/tmp/{{ bench.script_file }}'
   async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
   poll: 20
   register: script_async
