@@ -10,14 +10,24 @@
     parameter_names: ["repetition"]
     parameter_list: '{{ [ num_repetitions ] }}'
 
+- debug:
+  msg: 'benchmark.parameters: {{ benchmark.parameters }}'
+  
 - name: unnest parameters when parameters for benchmark were passed
   set_fact:
     parameter_names: '{{ parameter_names + [item.key] }}'
     parameter_list: '{{ parameter_list + [item.value] }}'
   with_dict: '{{ benchmark.parameters | default({}) }}'
 
+- debug:
+  msg: 'parameter_names: {{ parameter_names }}'
+
+- debug:
+  msg: 'parameter_list: {{ parameter_list }}'
+
 - name: parametrized execution
   include_tasks: run-bench-parametrized.yml
   with_cartesian: '{{ parameter_list }}'
   loop_control:
     loop_var: parameter_values
+...

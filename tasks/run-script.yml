@@ -1,11 +1,5 @@
 ---
 - debug:
-    msg: 'bench.script_src_dir: {{ bench.script_src_dir }}'
-
-- debug:
-    msg: 'bench.script_file: {{ bench.script_file }}'
-
-- debug:
     msg: 'playbook_dir: {{ playbook_dir }}'
 
 - name: push script
@@ -49,3 +43,4 @@
     module: copy
     content: '{{ script_result.stderr }}'
     dest: '{{ output_folder }}/std.err'
+...
