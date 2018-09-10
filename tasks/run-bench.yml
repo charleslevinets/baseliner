@@ -11,7 +11,7 @@
     parameter_list: '{{ [ num_repetitions ] }}'
 
 - debug:
-  msg: 'benchmark.parameters: {{ benchmark.parameters }}'
+    msg: 'benchmark.parameters: {{ benchmark.parameters }}'
   
 - name: unnest parameters when parameters for benchmark were passed
   set_fact:
@@ -20,10 +20,10 @@
   with_dict: '{{ benchmark.parameters | default({}) }}'
 
 - debug:
-  msg: 'parameter_names: {{ parameter_names }}'
+    msg: 'parameter_names: {{ parameter_names }}'
 
 - debug:
-  msg: 'parameter_list: {{ parameter_list }}'
+    msg: 'parameter_list: {{ parameter_list }}'
 
 - name: parametrized execution
   include_tasks: run-bench-parametrized.yml
