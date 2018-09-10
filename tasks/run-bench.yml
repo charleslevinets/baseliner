@@ -11,7 +11,7 @@
     parameter_list: '{{ [ num_repetitions ] }}'
 
 - debug:
-    msg: 'benchmark.parameters: {{ benchmark.parameters }}'
+    msg: 'benchmark.parameters: {{ benchmark.parameters | default({}) }}'
   
 - name: unnest parameters when parameters for benchmark were passed
   set_fact:
