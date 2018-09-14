@@ -9,6 +9,11 @@
   set_fact:
     env_host_map: '{{ bench.environment_host | default({}) }}'
 
+- local_action:
+    module: debug
+    msg: 'executing: {{ bench_params | combine(bench.environment) | combine(env_host_map[inventory_hostname] | default({}))}}'
+  run_once: true
+
 - name: run script
   shell: '/tmp/{{ bench.script | basename }}'
   async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
