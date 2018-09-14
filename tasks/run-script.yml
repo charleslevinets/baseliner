@@ -2,12 +2,13 @@
 - name: push script
   copy:
     src: '{{ bench.script }}'
-    dest: '/tmp/{{ bench.script }}'
+    dest: '/tmp/{{ bench.script | basename }}'
     mode: 0755
 
 - name: run script
-  shell: '/tmp/{{ bench.script }}'
+  shell: '/tmp/{{ bench.script | basename }}'
   async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
+  environment: '{{ bench_params | combine(bench.environment) }}'
   poll: 20
   register: script_async
 
