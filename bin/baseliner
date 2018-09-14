@@ -69,6 +69,9 @@ EOL
 
 if [ -n "${ANSIBLE_ROLES_PATH}" ]; then
   echo "roles_path = ${ANSIBLE_ROLES_PATH}" >> ansible.cfg
+else
+  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+  echo "roles_path = $SCRIPT_DIR/../.." >> ansible.cfg
 fi
 
 export ANSIBLE_LOG_PATH="${results_dir}/baseliner.log"
