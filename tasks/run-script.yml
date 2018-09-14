@@ -5,10 +5,14 @@
     dest: '/tmp/{{ bench.script | basename }}'
     mode: 0755
 
+- name: check if we have host-specific environment
+  set_fact:
+    env_host_map: '{{ bench.environment_host | default({}) }}'
+
 - name: run script
   shell: '/tmp/{{ bench.script | basename }}'
   async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
-  environment: '{{ bench_params | combine(bench.environment) }}'
+  environment: '{{ bench_params | combine(bench.environment) | combine(env_host_map[inventory_hostname] | default({}))}}'
   poll: 20
   register: script_async
 
