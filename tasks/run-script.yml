@@ -13,6 +13,12 @@
   async: '{{ bench.test_timeout | default(test_timeout | default(6000)) }}'
   poll: 20
   register: script_async
+  when: run_raw is not defined or not run_raw
+
+- name: run script raw
+  raw: '/tmp/{{ bench.script_file }}'
+  register: script_async
+  when: run_raw is defined and run_raw
 
 - name: get output
   async_status:
