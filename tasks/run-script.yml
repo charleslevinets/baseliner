@@ -38,6 +38,7 @@
     module: copy
     content: '{{ script_result.delta }}'
     dest: '{{ output_folder }}/runtime'
+  when: run_raw is not defined or not run_raw
 
 - name: capture stdout
   local_action:
