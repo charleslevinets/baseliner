@@ -15,15 +15,16 @@
   register: script_async
   when: run_raw is not defined or not run_raw
 
-- name: run script raw
-  raw: '/tmp/{{ bench.script_file }}'
-  register: script_async
-  when: run_raw is defined and run_raw
-
 - name: get output
   async_status:
     jid: '{{ script_async.ansible_job_id }}'
   register: script_result
+  when: run_raw is not defined or not run_raw
+
+- name: run script raw
+  raw: '/tmp/{{ bench.script_file }}'
+  register: script_result
+  when: run_raw is defined and run_raw
 
 - name: set fact to store result of bench execution
   local_action:
