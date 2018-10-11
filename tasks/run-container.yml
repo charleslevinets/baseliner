@@ -161,6 +161,9 @@
   register: docker_run
   ignore_errors: true
 
+- debug:
+    msg: 'docker_run: {{ docker_run }}'
+
 - name: set fact to store result of bench execution
   local_action:
     module: set_fact
