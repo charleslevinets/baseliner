@@ -3,6 +3,7 @@
   synchronize:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
+    rsync_timeout: 300
   with_items: '{{ benchmark.put | default([]) }}'
 
 - name: initialize parameters and add number of repetitions
