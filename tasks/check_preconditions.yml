@@ -1,3 +1,11 @@
+- name: wait for guest to boot
+  wait_for_connection:
+    timeout: 600
+
+- name: guest ping is up, wait for dhcp to come up
+  pause:
+    minutes: 1
+
 - name: ensure expected variables are defined
   assert:
     that:
