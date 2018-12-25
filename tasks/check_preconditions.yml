@@ -6,6 +6,10 @@
   pause:
     minutes: 1
 
+- name: gather facts about guest
+  setup:
+    filter: ansible_*
+
 - name: ensure expected variables are defined
   assert:
     that:
