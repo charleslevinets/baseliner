@@ -9,6 +9,7 @@ print_usage() {
   echo "  -o <out-dir>   output directory (default: ./results)."
   echo "  -m <mode>      one of 'single-node' or 'parallel' (default: single-node)."
   echo "  -p <pretasks>  file containing pre-tasks (default: None)."
+  echo "  -q <posttasks> file containing post-tasks (default: None)."
   echo "  -e             terminate execution on first failure (default: false)."
   exit $1
 }
@@ -22,8 +23,9 @@ mode="single-node"
 failfast="false"
 delay=60
 pre_tasks_file=""
+post_tasks_file=""
 
-while getopts ":f:a:o:i:m:d:p:esh" o; do
+while getopts ":f:a:o:i:m:d:p:q:esh" o; do
   case "${o}" in
     f)
       config_file="${OPTARG}"
@@ -42,6 +44,9 @@ while getopts ":f:a:o:i:m:d:p:esh" o; do
       ;;
     p)
       pre_tasks_file="-e pre_tasks_file=${OPTARG}"
+      ;;
+    q)
+      post_tasks_file="-e post_tasks_file=${OPTARG}"
       ;;
     e)
       failfast="true"
@@ -93,7 +98,7 @@ ansible-playbook \
   -e stop_all="${stop_all}" \
   -e failfast="${failfast}" \
   -e test_wait_delay="${delay}" \
-  $pre_tasks_file \
+  $pre_tasks_file $post_tasks_file \
   ./playbook.yml
 
 ansible_result=$?
