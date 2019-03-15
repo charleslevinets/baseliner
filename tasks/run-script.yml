@@ -25,6 +25,7 @@
   raw: '/tmp/{{ bench.script_file }}'
   register: script_result
   when: run_raw is defined and run_raw
+  ignore_errors: true
 
 - name: set fact to store result of bench execution
   local_action:
