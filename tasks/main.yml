@@ -1,6 +1,9 @@
 ---
 - include_tasks: check_preconditions.yml
 
+- include_tasks: '{{ pre_tasks_file }}'
+  when: 'pre_tasks_file is defined'
+
 - name: store facts
   include_tasks: store-facts.yml
   when: store_facts | default(true)
@@ -8,9 +11,6 @@
 - name: start monitoring
   include_tasks: monitoring-start.yml
   when: enable_monitoring | default(false)
-
-- include_tasks: '{{ pre_tasks_file }}'
-  when: 'pre_tasks_file is defined'
 
 - name: get number of repetitions
   set_fact:
@@ -29,4 +29,3 @@
 
 - include_tasks: '{{ post_tasks_file }}'
   when: 'post_tasks_file is defined'
-...
