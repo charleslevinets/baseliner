@@ -98,6 +98,7 @@ ansible-playbook \
   -e stop_all="${stop_all}" \
   -e failfast="${failfast}" \
   -e test_wait_delay="${delay}" \
+  -vvv \
   $pre_tasks_file $post_tasks_file \
   ./playbook.yml
 
