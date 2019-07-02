@@ -66,7 +66,7 @@ done
 cat >ansible.cfg <<EOL
 [defaults]
 timeout = 2400
-gather_subset = !all
+gather_timeout = 20
 display_skipped_hosts = false
 retry_files_enabled = false
 host_key_checking = false
