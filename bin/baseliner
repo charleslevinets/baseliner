@@ -83,6 +83,7 @@ export ANSIBLE_LOG_PATH="${results_dir}/baseliner.log"
 
 cat >playbook.yml <<EOL
 - hosts: all
+  gather_facts: no
   roles:
   - baseliner
 EOL
