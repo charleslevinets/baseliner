@@ -72,7 +72,7 @@ retry_files_enabled = false
 host_key_checking = false
 callback_whitelist = profile_tasks, timer
 [ssh_connection]
-retries=10
+retries=20
 EOL
 
 if [ -n "${ANSIBLE_ROLES_PATH}" ]; then
