@@ -92,6 +92,9 @@ mkdir -p "${results_dir}"
 
 echo '' > "$ANSIBLE_LOG_PATH"
 
+echo "baseliner PYTHONUNBUFFERED = ${PYTHONUNBUFFERED}"
+export PYTHONUNBUFFERED=1
+
 ansible-playbook \
   -i "${inventory}" \
   -e @"${config_file}" \
